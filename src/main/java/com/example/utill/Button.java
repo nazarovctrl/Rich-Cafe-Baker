@@ -24,6 +24,13 @@ public class Button {
         return keyboardButton;
     }
 
+    public static KeyboardButton location() {
+        KeyboardButton keyboardButton = new KeyboardButton();
+        keyboardButton.setRequestLocation(true);
+        keyboardButton.setText("Manzilni jo'natish");
+        return keyboardButton;
+    }
+
     public static KeyboardRow row(KeyboardButton... keyboardButtons) {
         KeyboardRow keyboardRow = new KeyboardRow();
         keyboardRow.addAll(Arrays.asList(keyboardButtons));

@@ -2,9 +2,9 @@ package com.example.myTelegramBot;
 
 import com.example.config.BotConfig;
 import com.example.controller.AuthController;
+import com.example.controller.FormalizationController;
 import com.example.controller.MainController;
 
-import com.example.interfaces.Constant;
 import com.example.step.TelegramUsers;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -22,14 +22,16 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     private final MainController mainController;
     private final AuthController authController;
+    private final FormalizationController formalizationController;
     private final BotConfig botConfig;
 
     private List<TelegramUsers> usersList = new ArrayList<>();
 
 
-    public MyTelegramBot(MainController mainController, AuthController authController, BotConfig botConfig) {
+    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig) {
         this.mainController = mainController;
         this.authController = authController;
+        this.formalizationController = formalizationController;
 
         this.botConfig = botConfig;
     }
@@ -48,23 +50,23 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
             TelegramUsers users = saveUser(message.getChatId());
 
-            SendLocation sendLocation = new SendLocation();
+
             if (message.hasContact() && !authController.isExists(message)) {
                 authController.handle(message);
             }
 
 
             if (message.hasText()) {
-
                 if (!authController.isExists(message)) {
-
                     authController.handle(message);
                     return;
                 }
-
                 mainController.start(message);
+            }
 
-
+            if (message.hasLocation()) {
+                formalizationController.setLocationToOrder(message);
+                return;
             }
 
 

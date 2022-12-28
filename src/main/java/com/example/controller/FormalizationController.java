@@ -1,7 +1,7 @@
 package com.example.controller;
 
 import com.example.entity.OrderMealEntity;
-import com.example.entity.OrdersEntity;
+
 import com.example.enums.MethodType;
 import com.example.enums.Payment;
 import com.example.enums.Step;
@@ -14,11 +14,12 @@ import com.example.utill.Button;
 import com.example.utill.SendMsg;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,15 +33,17 @@ public class FormalizationController {
     private final OrdersService ordersService;
 
     private final OrderMealService orderMealService;
+    private final MainController mainController;
 
     private List<TelegramUsers> usersList = new ArrayList<>();
 
     @Lazy
-    public FormalizationController(MyTelegramBot myTelegramBot, MenuController menuController, OrdersService ordersService, OrderMealService orderMealService) {
+    public FormalizationController(MyTelegramBot myTelegramBot, MenuController menuController, OrdersService ordersService, OrderMealService orderMealService, MainController mainController) {
         this.myTelegramBot = myTelegramBot;
         this.menuController = menuController;
         this.ordersService = ordersService;
         this.orderMealService = orderMealService;
+        this.mainController = mainController;
     }
 
     public void handle(Message message) {
@@ -64,7 +67,6 @@ public class FormalizationController {
                 case Constant.back -> {
                     if (step.getStep() == null || step.getStep().equals(Step.SAVAT)) {
                         menuController.orderMenu(message);
-
                         step.setStep(Step.MAIN);
                         return;
                     }
@@ -79,6 +81,25 @@ public class FormalizationController {
                         return;
                     }
 
+                    if (step.getStep().equals(Step.OLIB_KETISH) ||
+                            step.getStep().equals(Step.DELIVERY)) {
+                        typeMethod(message);
+                        step.setStep(Step.TYPE_METHOD);
+                        return;
+                    }
+
+                    if (step.getStep().equals(Step.CONFIRM)) {
+                        delivery(message);
+                        step.setStep(Step.DELIVERY);
+                        return;
+                    }
+
+                    if (step.getStep().equals(Step.MAIN)) {
+                        TelegramUsers telegramUsers =mainController.saveUser(message.getChatId());
+                        telegramUsers.setStep(Step.MAIN);
+                        menuController.mainMenu(message);
+                        return;
+                    }
 
                 }
 
@@ -103,16 +124,23 @@ public class FormalizationController {
                     case Constant.yetkazish -> {
                         delivery(message);
                         ordersService.changeMethodType(message.getChatId(), MethodType.YETKAZIB_BERISH);
+                        step.setStep(Step.DELIVERY);
                         return;
                     }
                     case Constant.olibKetish -> {
-                         olibKetish(message);
+                        olibKetish(message);
                         ordersService.changeMethodType(message.getChatId(), MethodType.OLIB_KETISH);
+                        step.setStep(Step.OLIB_KETISH);
                         return;
                     }
                     case Constant.formalization -> {
                         typePayment(message);
                         step.setStep(Step.CASH);
+                        return;
+                    }
+                    case Constant.confirm -> {
+                        confirm(message);
+                        step.setStep(null);
                         return;
                     }
                 }
@@ -128,25 +156,64 @@ public class FormalizationController {
 
     private void olibKetish(Message message) {
 
+        SendPhoto sendPhoto = new SendPhoto();
+        sendPhoto.setChatId(message.getChatId());
+        InputFile inputFile = new InputFile();
+        File file = new File("attach/address.png");
+        inputFile.setMedia(file);
+
+        sendPhoto.setPhoto(inputFile);
+
+
+        String str = "\uD83D\uDCCD Olib ketish uchun manzil : ";
+
+        str += "\n Qarshi shahri, 3-mikrorayon, Yubileyniy tabaka orqa tomoni";
+        str += "\n <a href=\"https://www.google.com/maps/place/Rich+bakery+uz/@38.8433167,65.8029988,17z/data=!3m1!4b1!4m5!3m4!1s0x3f4ea902e3ececbb:0x6e7ba51076d43d34!8m2!3d38.8433125!4d65.8051875\">xaritadan ko'rish</a>";
+
+
+        sendPhoto.setCaption(str);
+        sendPhoto.setParseMode("HTML");
+
+        myTelegramBot.send(sendPhoto);
+        confirm(message);
+
+    }
+
+
+    private void confirm(Message message) {
+        myTelegramBot.send(
+                SendMsg.sendMsg(
+                        message.getChatId(),
+                        "Tanlang",
+                        Button.markup(
+                                Button.rowList(
+                                        Button.row(Button.button(Constant.confirm)),
+                                        Button.row(Button.button(Constant.back), Button.button(Constant.cancel))
+                                )
+                        )
+                )
+        );
+
+
     }
 
     private void delivery(Message message) {
 
-        KeyboardButton keyboardButton = new KeyboardButton();
-        keyboardButton.setRequestLocation(true);
-        keyboardButton.setText("Manzilni jo'natish");
 
-        KeyboardRow row = new KeyboardRow();
-        row.add(keyboardButton);
+        myTelegramBot.send(
+                SendMsg.sendMsg(
+                        message.getChatId(),
+                        "Yetkazib berish manzilini jonating",
+                        Button.markup(
+                                Button.rowList(
+                                        Button.row(Button.location()),
+                                        Button.row(Button.button(Constant.back))
+                                )
 
-        List<KeyboardRow> rowList = new ArrayList<>();
-        rowList.add(row);
+                        )
 
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setKeyboard(rowList);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-
-        myTelegramBot.send(SendMsg.sendMsgMark(message.getChatId(), "Yetkazib berish manzilini jonating", replyKeyboardMarkup));
+                )
+        );
 
     }
 
@@ -196,15 +263,18 @@ public class FormalizationController {
 
         }
 
-        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                savat,
-                Button.markup(Button.rowList(Button.row(
-                                Button.button(Constant.back),
-                                Button.button(Constant.tozalash)
-                        ),
-                        Button.row(Button.button(Constant.formalization))
-                ))
-        ));
+        myTelegramBot.send(
+                SendMsg.sendMsg(
+                        message.getChatId(),
+                        savat,
+                        Button.markup(
+                                Button.rowList(
+                                        Button.row(Button.button(Constant.formalization)),
+                                        Button.row(Button.button(Constant.back), Button.button(Constant.tozalash))
+                                )
+                        )
+                )
+        );
 
 
 //        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -235,5 +305,18 @@ public class FormalizationController {
         usersList.add(users);
 
         return users;
+    }
+
+    public void setLocationToOrder(Message message) {
+        TelegramUsers step = saveUser(message.getChatId());
+        if (!step.getStep().equals(Step.DELIVERY)) {
+            return;
+        }
+
+        Location location = message.getLocation();
+        ordersService.setLocation(message.getChatId(), location.getLatitude(), location.getLongitude());
+        confirm(message);
+
+        step.setStep(Step.CONFIRM);
     }
 }

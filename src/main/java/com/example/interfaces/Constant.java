@@ -23,7 +23,6 @@ public interface Constant {
     String home = "\uD83C\uDFE0 Bosh menyu";
 
 
-
     String phone = "\uD83D\uDCDE Telefon raqamingizni o'zgartiring";
 
 
@@ -51,6 +50,8 @@ public interface Constant {
 
     String yetkazish = "\uD83D\uDEF5 Yetkazib berish";
 
+    String confirm = "✅ Tasdiqlash";
+    String cancel = "❌ Bekor qilish";
 
 
 }

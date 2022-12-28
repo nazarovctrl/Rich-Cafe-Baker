@@ -66,4 +66,10 @@ public class OrdersService {
         ProfileEntity profile = authService.findByUserId(userId);
         ordersRepository.changeMethodType(profile.getId(),methodType);
     }
+
+    public void setLocation(Long userId, Double latitude, Double longitude) {
+        ProfileEntity profile = authService.findByUserId(userId);
+        ordersRepository.setLocation(profile.getId(),latitude,longitude);
+
+    }
 }

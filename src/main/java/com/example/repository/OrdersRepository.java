@@ -33,4 +33,10 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
     @Transactional
     @Query("update OrdersEntity o  set o.methodType=?2 where o.profile.id=?1 and o.visible=true and o.status='NOT_CONFIRMED' ")
     void changeMethodType(Integer id, MethodType methodType);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("update OrdersEntity o  set o.latitude=?2 , o.longitude=?3 where o.profile.id=?1 and o.visible=true and o.status='NOT_CONFIRMED' ")
+    void setLocation(Integer id, Double latitude, Double longitude);
+
 }
