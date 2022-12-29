@@ -59,17 +59,23 @@ public class OrdersService {
 
     public void changePayment(Long userId, Payment cash) {
         ProfileEntity profile = authService.findByUserId(userId);
-        ordersRepository.changePayment(profile.getId(),cash);
+        ordersRepository.changePayment(profile.getId(), cash);
     }
 
     public void changeMethodType(Long userId, MethodType methodType) {
         ProfileEntity profile = authService.findByUserId(userId);
-        ordersRepository.changeMethodType(profile.getId(),methodType);
+        ordersRepository.changeMethodType(profile.getId(), methodType);
     }
 
     public void setLocation(Long userId, Double latitude, Double longitude) {
         ProfileEntity profile = authService.findByUserId(userId);
-        ordersRepository.setLocation(profile.getId(),latitude,longitude);
+        ordersRepository.setLocation(profile.getId(), latitude, longitude);
 
+    }
+
+    public OrdersEntity getByUserId(Long userId) {
+        OrdersEntity entity = ordersRepository.findByProfile_UserIdAndVisibleAndStatus(userId, true, OrdersStatus.NOT_CONFIRMED);
+
+        return entity;
     }
 }

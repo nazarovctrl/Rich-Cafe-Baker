@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.entity.ProfileEntity;
+import com.example.enums.ProfileRole;
 import com.example.enums.Step;
 import com.example.enums.UserStatus;
 import com.example.myTelegramBot.MyTelegramBot;
@@ -26,7 +27,7 @@ public class AuthController {
 
     private final MenuController menuController;
 
-    private List<TelegramUsers> usersList=new ArrayList<>();
+    private List<TelegramUsers> usersList = new ArrayList<>();
     ProfileEntity profileEntity = new ProfileEntity();
 
     @Lazy
@@ -37,14 +38,14 @@ public class AuthController {
     }
 
 
-    public void handle(Message message){
+    public void handle(Message message) {
 
 
         TelegramUsers users = saveUser(message.getChatId());
 
-        if (message.hasText()){
+        if (message.hasText()) {
 
-            if (users.getStep()==null){
+            if (users.getStep() == null) {
                 myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                         "Assalomualeykum Ismingiz va Familiyangizni kiriting"));
 
@@ -52,7 +53,7 @@ public class AuthController {
                 return;
             }
 
-            if (users.getStep().equals(Step.NAME)){
+            if (users.getStep().equals(Step.NAME)) {
                 profileEntity.setFullName(message.getText());
 
                 myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -64,24 +65,25 @@ public class AuthController {
                 return;
             }
 
-            if (users.getStep().equals(Step.PHONE)){
+            if (users.getStep().equals(Step.PHONE)) {
 
-                if (!checkPhone(message.getText())){
+                if (!checkPhone(message.getText())) {
                     myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                             "Iltimos telefom raqamni to'g'ri kiriting ! "));
                     return;
                 }
 
-                if (checkPhoneExists(message.getText())){
-                        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                                "Bu raqam ruyhatdan o'tgan \n" +
-                                        "Iltimos qaytadan kiriting "));
-                        return;
+                if (checkPhoneExists(message.getText())) {
+                    myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                            "Bu raqam ruyhatdan o'tgan \n" +
+                                    "Iltimos qaytadan kiriting "));
+                    return;
                 }
 
                 profileEntity.setPhone(message.getText());
                 profileEntity.setUserId(message.getChatId());
                 profileEntity.setStatus(UserStatus.ACTIVE);
+                profileEntity.setRole(ProfileRole.USER);
 
                 authService.createProfile(profileEntity);
                 myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -95,11 +97,11 @@ public class AuthController {
             return;
         }
 
-        if (message.hasContact()){
+        if (message.hasContact()) {
 
-            if (users.getStep().equals(Step.PHONE)){
+            if (users.getStep().equals(Step.PHONE)) {
 
-                if (checkPhoneExists(message.getContact().getPhoneNumber())){
+                if (checkPhoneExists(message.getContact().getPhoneNumber())) {
                     myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                             "Bu raqam avval kiritilgan "));
                     return;
@@ -125,19 +127,19 @@ public class AuthController {
     }
 
 
-    public boolean isExists(Message message){
-       return authService.isExists(message.getChatId());
+    public boolean isExists(Message message) {
+        return authService.isExists(message.getChatId());
     }
 
-    public  boolean checkPhone(String text){
-        if (text.startsWith("+998") && text.length() ==13 || text.startsWith("998") && text.length() == 12){
+    public boolean checkPhone(String text) {
+        if (text.startsWith("+998") && text.length() == 13 || text.startsWith("998") && text.length() == 12) {
 
             return true;
         }
         return false;
     }
 
-    public  boolean checkPhoneExists(String text ){
+    public boolean checkPhoneExists(String text) {
         return authService.isExists(text);
     }
 
