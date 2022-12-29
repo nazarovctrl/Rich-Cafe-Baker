@@ -51,7 +51,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             Long userId = message.getChatId();
 
 
-            if (message.getChatId() == 1024661500){
+            if (message.getChatId() == 912723931){
                 adminController.handle(message);
                 return;
             }
@@ -84,9 +84,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
 
 
-    public void send(SendMessage sendMessage) {
+    public Message send(SendMessage sendMessage) {
         try {
-            execute(sendMessage);
+            return execute(sendMessage);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

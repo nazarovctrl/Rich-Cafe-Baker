@@ -1,5 +1,5 @@
 package com.example.enums;
 
 public enum UserStatus {
-    ACTIVE,BLOCK,SUPPLIER,ADMIN
+    ACTIVE,BLOCK
 }

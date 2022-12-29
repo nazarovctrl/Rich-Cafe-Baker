@@ -1,5 +1,7 @@
 package com.example.controller;
 
+import com.example.admin.service.SettingsService;
+import com.example.entity.AdminEntity;
 import com.example.entity.OrderMealEntity;
 
 import com.example.entity.OrdersEntity;
@@ -37,6 +39,7 @@ public class FormalizationController {
 
     private final AuthService authService;
 
+    private final SettingsService settingsService;
     private final MenuController menuController;
 
     private final OrdersService ordersService;
@@ -48,9 +51,10 @@ public class FormalizationController {
     private List<TelegramUsers> usersList = new ArrayList<>();
 
     @Lazy
-    public FormalizationController(MyTelegramBot myTelegramBot, AuthService authService, MenuController menuController, OrdersService ordersService, OrderMealService orderMealService, MainController mainController, OrdersController ordersController) {
+    public FormalizationController(MyTelegramBot myTelegramBot, AuthService authService, SettingsService settingsService, MenuController menuController, OrdersService ordersService, OrderMealService orderMealService, MainController mainController, OrdersController ordersController) {
         this.myTelegramBot = myTelegramBot;
         this.authService = authService;
+        this.settingsService = settingsService;
         this.menuController = menuController;
         this.ordersService = ordersService;
         this.orderMealService = orderMealService;
@@ -211,7 +215,7 @@ public class FormalizationController {
         Message send = myTelegramBot.send(sendMessage1);
 
 
-        List<ProfileEntity> adminList = authService.getAdminList();
+        List<AdminEntity> adminList=settingsService.getAdminList();
 
         SendMessage sendMessage = new SendMessage();
 
@@ -267,8 +271,8 @@ public class FormalizationController {
 
         sendMessage.setReplyMarkup(markup);
 
-        for (ProfileEntity profile : adminList) {
-            sendMessage.setChatId(profile.getUserId());
+        for (AdminEntity admin : adminList) {
+            sendMessage.setChatId(admin.getUserId());
             myTelegramBot.send(sendMessage);
         }
 
