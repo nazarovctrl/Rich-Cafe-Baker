@@ -14,7 +14,7 @@ import lombok.ToString;
 @Entity
 @ToString
 
-@Table(name = "profile")
+@Table(name = "admin_table")
 public class AdminEntity {
 
     @Id
@@ -27,8 +27,14 @@ public class AdminEntity {
     @Column
     private String phone;
 
+    @Column
+    private String password;
+
     @Column(name = "user_id")
     private Long userId;
+    @Enumerated(EnumType.STRING)
+    @Column
+    private UserRole status;
 
 
 }
