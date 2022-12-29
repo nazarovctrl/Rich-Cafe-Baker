@@ -5,6 +5,7 @@ import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.repository.MenuRepository;
 import com.example.service.AddMenuService;
+import com.example.service.OrdersService;
 import com.example.service.UserService;
 import com.example.utill.Button;
 import com.example.utill.SendMsg;
@@ -31,6 +32,9 @@ public class MenuController {
 
     @Autowired
     private AddMenuService menuService;
+
+    @Autowired
+    private OrdersService ordersService;
 
     public void mainMenu(Message message) {
 
@@ -92,8 +96,8 @@ public class MenuController {
 
 
     public void order(Message message) {
+     ordersService.getOrdersHistory(message.getChatId());
 
-        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "Test Rejim"));
     }
 
     public void about(Message message) {

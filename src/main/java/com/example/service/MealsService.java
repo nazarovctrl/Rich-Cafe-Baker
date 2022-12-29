@@ -26,7 +26,6 @@ public class MealsService {
 
         return mealsRepository.findByName(text);
 
-
     }
 
     public List<MealEntity> findNameList(String text) {

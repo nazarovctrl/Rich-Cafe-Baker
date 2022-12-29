@@ -70,10 +70,12 @@ public class DeliveryService {
         StringBuilder text = new StringBuilder("\uD83D\uDCE5 *Buyurtma :* \n\n");
 
         text.append("*Buyurtma raqami: ").append(ordersEntity.getId()).append("* \n");
+        double total = 0;
         for (OrderMealEntity entity : oderMealList) {
-            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append("\n\n");
-
+            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append(" so'm \n\n");
+            total += entity.getMeal().getPrice() * entity.getQuantity();
         }
+        text.append("\n Jami: ").append(total).append(" so'm");
 
         sendMessage.setText(text.toString());
 

@@ -16,7 +16,6 @@ import java.util.Optional;
 public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
     List<OrdersEntity> findAll();
 
-    List<OrdersEntity> findByProfile_Id(Long userId);
 
     @Override
     Optional<OrdersEntity> findById(Integer integer);
@@ -56,4 +55,8 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
     @Transactional
     @Query("update OrdersEntity o  set o.status=?2 where o.id=?1 ")
     void changeStatusById(Integer orderId, OrdersStatus status);
+
+
+    @Query("from OrdersEntity o where o.profile.userId=?1 and o.status=?2 and o.visible=true ")
+    List<OrdersEntity> getOrdersHistoryListByUserId(Long userId, OrdersStatus status);
 }

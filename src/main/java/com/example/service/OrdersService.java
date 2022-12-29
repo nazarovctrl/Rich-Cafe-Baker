@@ -2,11 +2,13 @@ package com.example.service;
 
 import com.example.admin.service.DeliveryService;
 import com.example.controller.MenuController;
+import com.example.entity.OrderMealEntity;
 import com.example.entity.OrdersEntity;
 import com.example.entity.ProfileEntity;
 import com.example.enums.MethodType;
 import com.example.enums.OrdersStatus;
 import com.example.enums.Payment;
+import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.repository.MenuRepository;
 import com.example.repository.OrdersRepository;
@@ -20,6 +22,11 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalField;
+import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,10 +41,10 @@ public class OrdersService {
     private final DeliveryService deliveryService;
 
     private final AuthService authService;
+    private final OrderMealService orderMealService;
 
     @Lazy
-
-    public OrdersService(OrdersRepository ordersRepository, MenuRepository menuRepository, MyTelegramBot myTelegramBot, MenuController menuController, OrdersService ordersService, DeliveryService deliveryService, AuthService authService) {
+    public OrdersService(OrdersRepository ordersRepository, MenuRepository menuRepository, MyTelegramBot myTelegramBot, MenuController menuController, OrdersService ordersService, DeliveryService deliveryService, AuthService authService, OrderMealService orderMealService) {
         this.ordersRepository = ordersRepository;
         this.menuRepository = menuRepository;
         this.myTelegramBot = myTelegramBot;
@@ -45,6 +52,7 @@ public class OrdersService {
         this.ordersService = ordersService;
         this.deliveryService = deliveryService;
         this.authService = authService;
+        this.orderMealService = orderMealService;
     }
 
     public void deleteByUserId(Long userId) {
@@ -173,5 +181,53 @@ public class OrdersService {
 
     public void update(OrdersEntity orders) {
         ordersRepository.save(orders);
+    }
+
+    public void getOrdersHistory(Long chatId) {
+        List<OrdersEntity> entityList = ordersRepository.getOrdersHistoryListByUserId(chatId, OrdersStatus.FINISHED);
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(chatId);
+        sendMessage.setParseMode("MARKDOWN");
+
+        for (OrdersEntity ordersEntity : entityList) {
+
+
+            List<OrderMealEntity> mealList = orderMealService.getListByOrderId(ordersEntity.getId());
+            StringBuilder text = new StringBuilder();
+
+            LocalDateTime createdDate = ordersEntity.getCreatedDate();
+            text.append("*Buyurtma raqami: ").append(ordersEntity.getId());
+            text.append("\nSana: ").append(createdDate.toLocalDate());
+            text.append("\nVaqt: ").append(createdDate.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm")));
+
+            Payment payment = ordersEntity.getPayment();
+            String kind = "";
+            if (payment.equals(Payment.CASH)) {
+                kind = Constant.cash;
+            }
+            text.append("\nTo'lov turi: ").append(kind);
+
+            MethodType methodType = ordersEntity.getMethodType();
+            String type = "";
+            if (methodType.equals(MethodType.OLIB_KETISH)) {
+                type = "Olib ketish";
+            } else {
+                type = "\uD83D\uDEF5 Yetkazib berish";
+            }
+            text.append("\nBuyurtma turi: ").append(type).append("*\n\n");
+
+
+            double total = 0;
+            for (OrderMealEntity entity : mealList) {
+                text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append(" so'm \n\n");
+                total += entity.getMeal().getPrice() * entity.getQuantity();
+            }
+            text.append("\n Jami: ").append(total).append(" so'm");
+
+            sendMessage.setText(text.toString());
+            myTelegramBot.send(sendMessage);
+
+        }
+
     }
 }

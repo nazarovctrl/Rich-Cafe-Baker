@@ -18,9 +18,6 @@ import com.example.service.OrdersService;
 import com.example.step.TelegramUsers;
 import com.example.utill.Button;
 import com.example.utill.SendMsg;
-import com.google.code.geocoder.Geocoder;
-import com.google.code.geocoder.model.GeocoderRequest;
-import org.apache.poi.ss.formula.functions.Address;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -33,7 +30,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.io.File;
-import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -211,7 +207,6 @@ public class FormalizationController {
     }
 
     private void checkOrder(Message message) {
-        /// TODO send to admin for checking orders
         ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
         replyKeyboardRemove.setRemoveKeyboard(true);
 
@@ -237,11 +232,15 @@ public class FormalizationController {
         StringBuilder text = new StringBuilder("\uD83D\uDCE5 *Buyurtma :* \n\n");
 
         text.append("*Buyurtma raqami: ").append(orders.getId()).append("* \n");
-        for (OrderMealEntity entity : oderMealList) {
-            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append("\n\n");
 
+        double total = 0;
+        for (OrderMealEntity entity : oderMealList) {
+            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append(" so'm \n\n");
+
+            total += entity.getMeal().getPrice() * entity.getQuantity();
         }
-        text.append("*Buyurtma turi:* ");
+        text.append("\n *Jami: ").append(total).append(" so'm*");
+        text.append("\n *Buyurtma turi:* ");
 
         if (orders.getMethodType().equals(MethodType.OLIB_KETISH)) {
             text.append("_Olib ketish_");
@@ -356,15 +355,17 @@ public class FormalizationController {
 
         String savat = "\uD83D\uDCE5 *Buyurtma :* \n\n";
 
+        double total = 0;
         for (OrderMealEntity entity : oderMealList) {
 
             savat += entity.getMeal().getName() + "\n" +
                     entity.getQuantity() + " x " + entity.getMeal().getPrice() + " = " +
-                    entity.getMeal().getPrice() * entity.getQuantity() + "\n\n";
-
+                    entity.getMeal().getPrice() * entity.getQuantity() + " so'm \n\n";
+            total += entity.getMeal().getPrice() * entity.getQuantity();
 
         }
-        savat += "*Buyurtma turi:* ";
+        savat += "\n *Jami: " + total+" so'm*";
+        savat += "\n *Buyurtma turi:* ";
 
         if (orders.getMethodType().equals(MethodType.OLIB_KETISH)) {
             savat += "_Olib ketish_";
@@ -464,16 +465,18 @@ public class FormalizationController {
         }
 
         String savat = "\uD83D\uDCE5 Savat: \n\n";
+        double total = 0;
 
         for (OrderMealEntity entity : oderMealList) {
 
             savat += entity.getMeal().getName() + "\n" +
                     entity.getQuantity() + " x " + entity.getMeal().getPrice() + " = " +
-                    entity.getMeal().getPrice() * entity.getQuantity() + "\n\n";
+                    entity.getMeal().getPrice() * entity.getQuantity() + " so'm \n\n";
 
+            total += entity.getMeal().getPrice() * entity.getQuantity();
 
         }
-
+        savat += "\n Jami: " + total+" so'm";
         myTelegramBot.send(
                 SendMsg.sendMsg(
                         message.getChatId(),
