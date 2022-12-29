@@ -1,16 +1,16 @@
 package com.example.service;
 
 import com.example.entity.ProfileEntity;
-import com.example.repository.AuthRepository;
+import com.example.repository.ProfileRepository;
 import org.springframework.stereotype.Service;
 
 
 @Service
 public class AuthService {
 
-    private final AuthRepository repository;
+    private final ProfileRepository repository;
 
-    public AuthService(AuthRepository authRepository) {
+    public AuthService(ProfileRepository authRepository) {
         this.repository = authRepository;
     }
 

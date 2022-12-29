@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.entity.OrderMealEntity;
 
+import com.example.entity.OrdersEntity;
 import com.example.enums.MethodType;
 import com.example.enums.Payment;
 import com.example.enums.Step;
@@ -95,7 +96,7 @@ public class FormalizationController {
                     }
 
                     if (step.getStep().equals(Step.MAIN)) {
-                        TelegramUsers telegramUsers =mainController.saveUser(message.getChatId());
+                        TelegramUsers telegramUsers = mainController.saveUser(message.getChatId());
                         telegramUsers.setStep(Step.MAIN);
                         menuController.mainMenu(message);
                         return;
@@ -112,6 +113,13 @@ public class FormalizationController {
                 case Constant.savat -> {
                     ordersList(message);
                     step.setStep(Step.SAVAT);
+                    return;
+                }
+                case Constant.home -> {
+                    TelegramUsers mainStep = mainController.saveUser(message.getChatId());
+                    mainStep.setStep(Step.MAIN);
+                    menuController.mainMenu(message);
+                    step.setStep(null);
                     return;
                 }
 
@@ -139,7 +147,7 @@ public class FormalizationController {
                         return;
                     }
                     case Constant.confirm -> {
-                        confirm(message);
+                        checkOrder(message);
                         step.setStep(null);
                         return;
                     }
@@ -150,6 +158,12 @@ public class FormalizationController {
 
 
         }
+
+
+    }
+
+    private void checkOrder(Message message) {
+        /// TODO send to admin for checking orders
 
 
     }
@@ -181,10 +195,59 @@ public class FormalizationController {
 
 
     private void confirm(Message message) {
+        TelegramUsers step = saveUser(message.getChatId());
+        List<OrderMealEntity> oderMealList = orderMealService.getNOTCONFIRMEDOderMealList(message.getChatId());
+        OrdersEntity orders = ordersService.getByUserId(message.getChatId());
+
+        if (oderMealList.isEmpty() || orders == null) {
+            System.out.println("order");
+            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                    "Sizning savatingiz bo'sh \n, buyurtma berish uchun mahsulot tanlang"));
+            menuController.orderMenu(message);
+            return;
+        }
+
+        if (orders.getPayment() == null) {
+            typePayment(message);
+            step.setStep(Step.CASH);
+            return;
+        }
+        if (orders.getMethodType() == null) {
+            typeMethod(message);
+            step.setStep(Step.TYPE_METHOD);
+            return;
+        }
+
+
+        String savat = "\uD83D\uDCE5 *Buyurtma :* \n\n";
+
+        for (OrderMealEntity entity : oderMealList) {
+
+            savat += entity.getMeal().getName() + "\n" +
+                    entity.getQuantity() + " x " + entity.getMeal().getPrice() + " = " +
+                    entity.getMeal().getPrice() * entity.getQuantity() + "\n\n";
+
+
+        }
+        savat += "*Buyurtma turi:* ";
+
+        if (orders.getMethodType().equals(MethodType.OLIB_KETISH)) {
+            savat += "_Olib ketish_";
+        } else {
+            savat += "\uD83D\uDEF5 _Yetkazib berish_";
+        }
+
+        savat += "\n *To'lov turi:* ";
+
+        if (orders.getPayment() == Payment.CASH) {
+            savat += "\uD83D\uDCB5 _Naqd_";
+        }
+
+
         myTelegramBot.send(
-                SendMsg.sendMsg(
+                SendMsg.sendMsgParse(
                         message.getChatId(),
-                        "Tanlang",
+                        savat,
                         Button.markup(
                                 Button.rowList(
                                         Button.row(Button.button(Constant.confirm)),
@@ -199,6 +262,7 @@ public class FormalizationController {
 
     private void delivery(Message message) {
 
+        String str = "";
 
         myTelegramBot.send(
                 SendMsg.sendMsg(

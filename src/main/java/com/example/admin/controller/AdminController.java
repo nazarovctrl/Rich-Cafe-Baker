@@ -1,19 +1,16 @@
 package com.example.admin.controller;
 
-
-
-
 import com.example.admin.service.AdminService;
 import com.example.admin.service.MainMenuService;
 import com.example.admin.service.MenuService;
 import com.example.admin.service.SettingService;
-import com.example.entity.AdminEntity;
 import com.example.entity.MenuEntity;
+import com.example.entity.ProfileEntity;
 import com.example.enums.Step;
-import com.example.admin.repository.AdminRepository;
 import com.example.admin.repository.AdminMenuRepository;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
+import com.example.repository.ProfileRepository;
 import com.example.step.TelegramUsers;
 import com.example.utill.SendMsg;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,14 +33,14 @@ public class AdminController {
     private final SettingService settingService;
     private final AdminMenuRepository adminMenuRepository;
     private final AdminService addAdminService;
-    private final AdminRepository adminRepository;
+    private final ProfileRepository adminRepository;
 
     private MenuEntity menuEntity = new MenuEntity();
-    private AdminEntity adminEntity = new AdminEntity();
+    private ProfileEntity adminEntity = new ProfileEntity();
 
     @Autowired
     @Lazy
-    public AdminController(MainMenuService menuService, MyTelegramBot myTelegramBot, MenuService addMenuService, SettingService settingService, AdminMenuRepository adminMenuRepository, AdminService addAdminService, AdminRepository adminRepository) {
+    public AdminController(MainMenuService menuService, MyTelegramBot myTelegramBot, MenuService addMenuService, SettingService settingService, AdminMenuRepository adminMenuRepository, AdminService addAdminService, ProfileRepository adminRepository) {
         this.menuService = menuService;
         this.myTelegramBot = myTelegramBot;
         this.addMenuService = addMenuService;
@@ -132,7 +129,7 @@ public class AdminController {
 
             }
             case GET_NAME_OF_ADMIN -> {
-                adminEntity.setFullname(message.getText());
+                adminEntity.setFullName(message.getText());
                 addAdminService.getphoneOfAdmin(message);
                 user.setStep(Step.GET_PHONE_OF_ADMIN);
             }
@@ -148,7 +145,7 @@ public class AdminController {
                     adminRepository.save(adminEntity);
                     addAdminService.saveOfAdmin(message);
                     user.setStep(Step.MAIN);
-                    adminEntity = new AdminEntity();
+                    adminEntity = new ProfileEntity();
                 }
             }
 

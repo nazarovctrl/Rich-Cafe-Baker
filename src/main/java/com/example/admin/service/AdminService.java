@@ -1,8 +1,8 @@
 package com.example.admin.service;
 
-import com.example.entity.AdminEntity;
-import com.example.admin.repository.AdminRepository;
+import com.example.entity.ProfileEntity;
 import com.example.myTelegramBot.MyTelegramBot;
+import com.example.repository.ProfileRepository;
 import com.example.utill.Button;
 import com.example.interfaces.Constant;
 import com.example.utill.SendMsg;
@@ -20,11 +20,11 @@ import java.util.*;
 @Service
 public class AdminService {
 
-    private final AdminRepository adminRepository;
+    private final ProfileRepository adminRepository;
 
     private final MyTelegramBot mainController;
 
-    public AdminService(AdminRepository adminRepository, MyTelegramBot mainController) {
+    public AdminService(ProfileRepository adminRepository, MyTelegramBot mainController) {
         this.adminRepository = adminRepository;
         this.mainController = mainController;
     }
@@ -80,13 +80,13 @@ public class AdminService {
 
         boolean check = false;
 
-        List<AdminEntity> adminEntityList = adminRepository.findAll();
+        List<ProfileEntity> adminEntityList = adminRepository.findAll();
 
         Map<Integer, Object[]> patientData = new TreeMap<Integer, Object[]>();
 
         patientData.put(0, new Object[]{"ID raqami ", " Ism va Familiyasi", "Telefon raqami"});
 
-        for (AdminEntity adminEntity : adminEntityList) {
+        for (ProfileEntity adminEntity : adminEntityList) {
 
             if (adminEntity != null) {
 
@@ -97,7 +97,7 @@ public class AdminService {
 
                 XSSFRow row;
 
-                patientData.put(adminEntity.getId(), new Object[]{adminEntity.getId().toString(), adminEntity.getFullname(),
+                patientData.put(adminEntity.getId(), new Object[]{adminEntity.getId().toString(), adminEntity.getFullName(),
                         adminEntity.getPhone()});
                 Set<Integer> keyid = patientData.keySet();
 
@@ -149,13 +149,13 @@ public class AdminService {
     public void deleteByPhone(Message message) {
         boolean phone = checkPhoneNumber(message);
         if (phone) {
-            Optional<AdminEntity> optional = adminRepository.findByPhone(message.getText());
+            Optional<ProfileEntity> optional = adminRepository.findByPhone(message.getText());
             if (optional.isEmpty()) {
                 mainController.send(SendMsg.sendMsgParse(message.getChatId(),
                         "*Bunday telefon raqam ba'zada mavju emas*",
                         Button.markup(Button.rowList(Button.row(Button.button(Constant.back))))));
             } else {
-                AdminEntity adminEntity = optional.get();
+                ProfileEntity adminEntity = optional.get();
                 try {
                     adminRepository.delete(adminEntity);
                     mainController.send(SendMsg.sendMsgParse(message.getChatId(),
