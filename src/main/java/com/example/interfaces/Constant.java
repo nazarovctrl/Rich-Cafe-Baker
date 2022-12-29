@@ -53,5 +53,14 @@ public interface Constant {
     String confirm = "✅ Tasdiqlash";
     String cancel = "❌ Bekor qilish";
 
+    String backSettingsPanel = "⬅ Orqaga";
+
+    String mealsList = "\uD83D\uDCD6 Maxsulotlar ro'yxati";
+    String menuList = "\uD83D\uDCD6  Menular ro'yxati";
+    String addSupplier = "➕ Dastavchik qo'shish";
+    String deleteSupplier = "\uD83D\uDDD1 Dastavchik o'chirish";
+    String supplierList = "\uD83D\uDCD6 Dastavchiklar ro'yxati";
+
+
 
 }

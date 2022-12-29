@@ -1,6 +1,7 @@
 package com.example.myTelegramBot;
 
-import com.example.admin.controller.AdminController;
+
+import com.example.admin.controller.AdminMainController;
 import com.example.config.BotConfig;
 import com.example.controller.AuthController;
 import com.example.controller.FormalizationController;
@@ -23,28 +24,24 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     private final MainController mainController;
     private final AuthController authController;
-    private final AdminController adminController;
     private final FormalizationController formalizationController;
     private final BotConfig botConfig;
+    private final AdminMainController adminController;
 
     private List<TelegramUsers> usersList = new ArrayList<>();
 
-
-    public MyTelegramBot(MainController mainController, AuthController authController, AdminController adminController, FormalizationController formalizationController, BotConfig botConfig) {
+    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController) {
         this.mainController = mainController;
         this.authController = authController;
-        this.adminController = adminController;
         this.formalizationController = formalizationController;
-
         this.botConfig = botConfig;
+        this.adminController = adminController;
     }
+
 
     @Override
     public void onUpdateReceived(Update update) {
 
-        if (update.hasCallbackQuery()) {
-//            adminController.handleCalback(update.getCallbackQuery());
-        }
 
         if (update.hasMessage()) {
 
@@ -53,6 +50,11 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
             Long userId = message.getChatId();
 
+
+            if (message.getChatId() == 1024661500){
+                adminController.handle(message);
+                return;
+            }
 
             TelegramUsers users = saveUser(message.getChatId());
 
@@ -82,9 +84,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
 
 
-    public Message send(SendMessage sendMessage) {
+    public void send(SendMessage sendMessage) {
         try {
-            return execute(sendMessage);
+            execute(sendMessage);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

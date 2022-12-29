@@ -1,7 +1,6 @@
 package com.example.service;
 
 import com.example.entity.MealEntity;
-import com.example.entity.OrderMealEntity;
 import com.example.entity.OrdersEntity;
 import com.example.repository.MealsRepository;
 import com.example.repository.OrdersRepository;
