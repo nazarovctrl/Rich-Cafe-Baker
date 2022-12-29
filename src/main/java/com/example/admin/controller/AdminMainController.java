@@ -1,4 +1,5 @@
 package com.example.admin.controller;
+
 import com.example.admin.repository.AdminRepository;
 import com.example.admin.repository.AdminMealsRepository;
 import com.example.admin.repository.AdminMenuRepository;
@@ -11,13 +12,22 @@ import com.example.admin.util.MenuButtonUtil;
 import com.example.entity.AdminEntity;
 import com.example.entity.MealEntity;
 import com.example.entity.MenuEntity;
+import com.example.entity.OrdersEntity;
+import com.example.enums.OrdersStatus;
 import com.example.enums.Step;
 import com.example.enums.UserRole;
 import com.example.interfaces.Constant;
+import com.example.service.OrdersService;
 import com.example.step.TelegramUsers;
+import com.example.utill.SendMsg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +54,9 @@ public class AdminMainController {
     private SupplierService supplierService;
     @Autowired
     private SupplierRepostoriy supplierRepostoriy;
+
+    @Autowired
+    private OrdersService ordersService;
     private MealEntity mealEntity = new MealEntity();
     private MenuEntity menuEntity = new MenuEntity();
     private AdminEntity adminEntity = new AdminEntity();
@@ -194,7 +207,7 @@ public class AdminMainController {
 
                 boolean checkMenuNameDataBase = menuService.checkMenuName(message);
 
-                if(checkMenuNameDataBase){
+                if (checkMenuNameDataBase) {
                     return;
                 }
 
@@ -209,7 +222,7 @@ public class AdminMainController {
 
                 boolean checkMealsName = mealsService.checkMealsName(message);
 
-                if(checkMealsName) {
+                if (checkMealsName) {
                     mealEntity.setName(message.getText());
                     mealsService.mealsPrice(message);
                     user.setStep(Step.ADD_MEALS_PRICE);
@@ -241,7 +254,7 @@ public class AdminMainController {
 
                 boolean result = mealsService.mealesList(message);
 
-                if(result) {
+                if (result) {
                     mealsService.deleteMeal2(message);
                     user.setStep(Step.MEALS_DELETE_ID);
                 }
@@ -261,7 +274,7 @@ public class AdminMainController {
 
                 boolean result = mealsService.mealesListUpdate(message);
 
-                if(result){
+                if (result) {
                     mealsService.updateMeals(message);
                     user.setStep(Step.MEALS_UPDATE_BY_ID);
                 }
@@ -313,7 +326,7 @@ public class AdminMainController {
                 boolean checkpasswordDataBase = settingsService.checkpasswordDataBase(message);
                 boolean checkpassword = settingsService.checkpassword(message);
 
-                if(checkpasswordDataBase){
+                if (checkpasswordDataBase) {
                     return;
                 }
 
@@ -329,7 +342,7 @@ public class AdminMainController {
                 boolean phonecheckDataBase = settingsService.checkPhoneDataBase(message);
                 boolean phonecheck = settingsService.checkPhoneNumber(message);
 
-                if(phonecheckDataBase){
+                if (phonecheckDataBase) {
                     return;
                 }
 
@@ -346,9 +359,9 @@ public class AdminMainController {
             }
             case DELETE_ADMIN -> {
 
-                boolean result =  settingsService.deleteAdminById(message);
+                boolean result = settingsService.deleteAdminById(message);
 
-                if(result){
+                if (result) {
                     settingsService.deleteAdminGotovo(message);
                     user.setStep(Step.MAIN);
                 }
@@ -358,7 +371,7 @@ public class AdminMainController {
 
                 boolean result = settingsService.adminList(message);
 
-                if(result){
+                if (result) {
                     settingsService.adminListGotovo(message);
                 }
 
@@ -367,7 +380,7 @@ public class AdminMainController {
 
                 boolean result = mealsService.mealsListAdmin(message);
 
-                if(result){
+                if (result) {
                     mealsService.melasListGotovo(message);
                     user.setStep(Step.MAIN);
                 }
@@ -385,11 +398,11 @@ public class AdminMainController {
                 boolean checkPasswordDataBase = supplierService.checkPasswordDataBase(message);
                 boolean checkPassword = supplierService.checkPassword(message);
 
-                if(checkPasswordDataBase){
+                if (checkPasswordDataBase) {
                     return;
                 }
 
-                if(checkPassword) {
+                if (checkPassword) {
                     supplierService.addSupplierPhone(message);
                     adminEntity.setPassword(message.getText());
                     user.setStep(Step.SUPPLIER_PHONE);
@@ -401,11 +414,11 @@ public class AdminMainController {
                 boolean checkPhoneDataBase = supplierService.chackPhoneDataBase(message);
                 boolean checkPhone = supplierService.checkPhpone(message);
 
-                if(checkPhoneDataBase){
+                if (checkPhoneDataBase) {
                     return;
                 }
 
-                if(checkPhone){
+                if (checkPhone) {
                     adminEntity.setPhone(message.getText());
                     adminEntity.setUserId(message.getChatId());
                     adminEntity.setRole(UserRole.SUPPLIER);
@@ -420,7 +433,7 @@ public class AdminMainController {
 
                 boolean delete = supplierService.deleteSupplierById(message);
 
-                if(delete){
+                if (delete) {
                     supplierService.deleteSupplierGotovo(message);
                     user.setStep(Step.MAIN);
                 }
@@ -430,7 +443,7 @@ public class AdminMainController {
 
                 boolean result = supplierService.supplierList(message);
 
-                if(result){
+                if (result) {
                     supplierService.supplierListGotovo(message);
                     user.setStep(Step.MAIN);
                 }
@@ -438,13 +451,14 @@ public class AdminMainController {
 
         }
 
-        if (message.hasPhoto() && user.getStep().equals(Step.ADD_MEALS_PHOTO)){
+        if (message.hasPhoto() && user.getStep().equals(Step.ADD_MEALS_PHOTO)) {
             mealEntity.setPhoto(message.getPhoto().get(0).getFileId());
             mealsService.menuList(message);
             mealsService.addMealsMenu(message);
             user.setStep(Step.MEALS_MENU_lIST);
         }
     }
+
     public TelegramUsers saveUser(Long chatId) {
 
         for (TelegramUsers users : usersList) {
@@ -457,4 +471,6 @@ public class AdminMainController {
         usersList.add(users);
         return users;
     }
+
+
 }

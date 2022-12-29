@@ -7,6 +7,7 @@ import com.example.entity.OrderMealEntity;
 import com.example.entity.OrdersEntity;
 import com.example.entity.ProfileEntity;
 import com.example.enums.MethodType;
+import com.example.enums.OrdersStatus;
 import com.example.enums.Payment;
 import com.example.enums.Step;
 import com.example.interfaces.Constant;
@@ -17,6 +18,9 @@ import com.example.service.OrdersService;
 import com.example.step.TelegramUsers;
 import com.example.utill.Button;
 import com.example.utill.SendMsg;
+import com.google.code.geocoder.Geocoder;
+import com.google.code.geocoder.model.GeocoderRequest;
+import org.apache.poi.ss.formula.functions.Address;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -29,6 +33,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRem
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.io.File;
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -91,7 +96,9 @@ public class FormalizationController {
                 case Constant.back -> {
                     if (step.getStep() == null || step.getStep().equals(Step.SAVAT)) {
                         menuController.orderMenu(message);
-                        step.setStep(Step.MAIN);
+                        TelegramUsers saveUser = ordersController.saveUser(message.getChatId());
+                        saveUser.setStep(null);
+                        step.setStep(null);
                         return;
                     }
                     if (step.getStep().equals(Step.TYPE_METHOD)) {
@@ -215,7 +222,7 @@ public class FormalizationController {
         Message send = myTelegramBot.send(sendMessage1);
 
 
-        List<AdminEntity> adminList=settingsService.getAdminList();
+        List<AdminEntity> adminList = settingsService.getAdminList();
 
         SendMessage sendMessage = new SendMessage();
 
@@ -223,6 +230,8 @@ public class FormalizationController {
 
         List<OrderMealEntity> oderMealList = orderMealService.getNOTCONFIRMEDOderMealList(message.getChatId());
         OrdersEntity orders = ordersService.getByUserId(message.getChatId());
+        ordersService.changeStatus(message.getChatId(), OrdersStatus.CHECKING);
+
         ProfileEntity mijoz = authService.findByUserId(message.getChatId());
 
         StringBuilder text = new StringBuilder("\uD83D\uDCE5 *Buyurtma :* \n\n");
@@ -253,11 +262,11 @@ public class FormalizationController {
 
         InlineKeyboardButton button = new InlineKeyboardButton();
         button.setText("✅ Qabul qilish");
-        button.setCallbackData("/save/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
+        button.setCallbackData("save/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
 
         InlineKeyboardButton button2 = new InlineKeyboardButton();
         button2.setText("❌ Bekor qilish");
-        button2.setCallbackData("/cancel/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
+        button2.setCallbackData("cancel/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
 
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(button);

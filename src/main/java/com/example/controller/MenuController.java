@@ -46,6 +46,21 @@ public class MenuController {
                 ))
         ));
 
+    }
+
+    public void mainMenu(Long chatId) {
+
+        //Asosiy Menyu
+        myTelegramBot.send(SendMsg.sendMsg(chatId,
+                "Asosiy Menu", Button.markup(Button.rowList(Button.row(
+                                Button.button(Constant.addOrder)
+                        ),
+                        Button.row(Button.button(Constant.buyurtmalar),
+                                Button.button(Constant.settings)),
+                        Button.row(Button.button(Constant.about),
+                                Button.button(Constant.addComment))
+                ))
+        ));
 
     }
 
@@ -60,7 +75,6 @@ public class MenuController {
     }
 
     public void orderMenu(Message message) {
-
 
 
         List<MenuEntity> entityList = repository.findAll();

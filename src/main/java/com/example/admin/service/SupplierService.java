@@ -1,4 +1,5 @@
 package com.example.admin.service;
+
 import com.example.admin.repository.SupplierRepostoriy;
 import com.example.entity.AdminEntity;
 import com.example.enums.UserRole;
@@ -46,7 +47,7 @@ public class SupplierService {
         for (int i = 0; i < text.length(); i++) {
             if (!text.startsWith("+998") || (text.length() != 13)) {
                 myTelegramBot.send(SendMsg.sendMsgParse(message.getChatId(),
-                        "❌  Telefon nomer xato kiritildi !"+"\n"+
+                        "❌  Telefon nomer xato kiritildi !" + "\n" +
                                 "✅ Iltimos telefon raqamni quyidagi shakilda jo'nating Masalan : (+998971234567)"));
                 return false;
             }
@@ -80,7 +81,7 @@ public class SupplierService {
 
         List<AdminEntity> adminEntityList = supplierRepostoriy.findByRole(UserRole.SUPPLIER);
 
-        if(adminEntityList.isEmpty()){
+        if (adminEntityList.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "❌  Kechirasiz xali Dastavchik mavjud emas !"));
             return false;
@@ -89,11 +90,11 @@ public class SupplierService {
         for (AdminEntity adminEntity : adminEntityList) {
 
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                    "\uD83C\uDD94  ID : "+adminEntity.getId()+"\n" +
-                            "\uD83D\uDCCC  FullName : "+adminEntity.getFullname()+"\n" +
-                            "\uD83D\uDD11  Password : "+adminEntity.getPassword()+"\n" +
-                            "\uD83D\uDCDE  Phone : "+adminEntity.getPhone()+"\n" +
-                            "\uD83D\uDD30  Role : "+adminEntity.getRole()));
+                    "\uD83C\uDD94  ID : " + adminEntity.getId() + "\n" +
+                            "\uD83D\uDCCC  FullName : " + adminEntity.getFullname() + "\n" +
+                            "\uD83D\uDD11  Password : " + adminEntity.getPassword() + "\n" +
+                            "\uD83D\uDCDE  Phone : " + adminEntity.getPhone() + "\n" +
+                            "\uD83D\uDD30  Role : " + adminEntity.getRole()));
         }
         return true;
     }
@@ -108,7 +109,7 @@ public class SupplierService {
 
         Optional<AdminEntity> optional = supplierRepostoriy.findById(Integer.valueOf(message.getText()));
 
-        if(optional.isEmpty()){
+        if (optional.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "❌  Kechirasiz bunday ID mavjud emas qaytadan urining !"));
             return false;
@@ -144,7 +145,7 @@ public class SupplierService {
 
         Optional<AdminEntity> optional = supplierRepostoriy.findByPassword(message.getText());
 
-        if(optional.isPresent()){
+        if (optional.isPresent()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "❌ Kechirasiz bunday parol bor qaytadan urining"));
             return true;
@@ -156,12 +157,21 @@ public class SupplierService {
 
         Optional<AdminEntity> optional = supplierRepostoriy.findByPhone(message.getText());
 
-        if(optional.isPresent()){
+        if (optional.isPresent()) {
 
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "❌ Kechirasiz bunday telefon raqam bor qaytadan urining"));
             return true;
         }
         return false;
+    }
+
+
+    public List<AdminEntity> getEmptySupplierList() {
+        return supplierRepostoriy.findByRoleAndBusy(UserRole.SUPPLIER, false);
+    }
+
+    public AdminEntity getByUserId(Long userId) {
+        return supplierRepostoriy.findByUserId(userId);
     }
 }

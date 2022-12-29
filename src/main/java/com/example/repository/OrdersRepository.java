@@ -18,6 +18,9 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
 
     List<OrdersEntity> findByProfile_Id(Long userId);
 
+    @Override
+    Optional<OrdersEntity> findById(Integer integer);
+
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update OrdersEntity o  set o.visible=false where o.profile.id=?1 and o.visible=true and o.status='NOT_CONFIRMED' ")
@@ -43,4 +46,14 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
 
 
     OrdersEntity findByProfile_UserIdAndVisibleAndStatus(Long userId, boolean visible, OrdersStatus status);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("update OrdersEntity o  set o.status=?2 where o.profile.id=?1 and o.visible=true and o.status='NOT_CONFIRMED' ")
+    void changeStatus(Integer id, OrdersStatus status);
+
+    @Modifying(clearAutomatically = true)
+    @Transactional
+    @Query("update OrdersEntity o  set o.status=?2 where o.id=?1 ")
+    void changeStatusById(Integer orderId, OrdersStatus status);
 }
