@@ -1,13 +1,17 @@
 package com.example.controller;
 
+import com.example.admin.service.SettingsService;
+import com.example.entity.AdminEntity;
 import com.example.entity.OrderMealEntity;
 
 import com.example.entity.OrdersEntity;
+import com.example.entity.ProfileEntity;
 import com.example.enums.MethodType;
 import com.example.enums.Payment;
 import com.example.enums.Step;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
+import com.example.service.AuthService;
 import com.example.service.OrderMealService;
 import com.example.service.OrdersService;
 import com.example.step.TelegramUsers;
@@ -15,10 +19,14 @@ import com.example.utill.Button;
 import com.example.utill.SendMsg;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,22 +37,29 @@ public class FormalizationController {
 
     private final MyTelegramBot myTelegramBot;
 
+    private final AuthService authService;
+
+    private final SettingsService settingsService;
     private final MenuController menuController;
 
     private final OrdersService ordersService;
 
     private final OrderMealService orderMealService;
     private final MainController mainController;
+    private final OrdersController ordersController;
 
     private List<TelegramUsers> usersList = new ArrayList<>();
 
     @Lazy
-    public FormalizationController(MyTelegramBot myTelegramBot, MenuController menuController, OrdersService ordersService, OrderMealService orderMealService, MainController mainController) {
+    public FormalizationController(MyTelegramBot myTelegramBot, AuthService authService, SettingsService settingsService, MenuController menuController, OrdersService ordersService, OrderMealService orderMealService, MainController mainController, OrdersController ordersController) {
         this.myTelegramBot = myTelegramBot;
+        this.authService = authService;
+        this.settingsService = settingsService;
         this.menuController = menuController;
         this.ordersService = ordersService;
         this.orderMealService = orderMealService;
         this.mainController = mainController;
+        this.ordersController = ordersController;
     }
 
     public void handle(Message message) {
@@ -59,9 +74,17 @@ public class FormalizationController {
             switch (text) {
 
                 case Constant.tozalash -> {
-                    deleteAllOrderByUserId(message.getChatId());
+                    ordersService.deleteByUserId(message.getChatId());
                     myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                             "Savatchangiz tozalandi"));
+                    step.setStep(null);
+                    TelegramUsers saveUser = mainController.saveUser(message.getChatId());
+                    saveUser.setStep(Step.AddOrder);
+                    TelegramUsers saveUser1 = ordersController.saveUser(message.getChatId());
+                    saveUser1.setStep(null);
+
+                    menuController.orderMenu(message);
+
                     return;
                 }
 
@@ -77,8 +100,8 @@ public class FormalizationController {
                         return;
                     }
                     if (step.getStep().equals(Step.CASH)) {
-                        ordersList(message);
-                        step.setStep(Step.SAVAT);
+                        boolean b = ordersList(message);
+                        if (b) step.setStep(Step.SAVAT);
                         return;
                     }
 
@@ -111,8 +134,8 @@ public class FormalizationController {
                     return;
                 }
                 case Constant.savat -> {
-                    ordersList(message);
-                    step.setStep(Step.SAVAT);
+                    boolean b = ordersList(message);
+                    if (b) step.setStep(Step.SAVAT);
                     return;
                 }
                 case Constant.home -> {
@@ -130,14 +153,14 @@ public class FormalizationController {
                 String text1 = message.getText();
                 switch (text1) {
                     case Constant.yetkazish -> {
-                        delivery(message);
                         ordersService.changeMethodType(message.getChatId(), MethodType.YETKAZIB_BERISH);
+                        delivery(message);
                         step.setStep(Step.DELIVERY);
                         return;
                     }
                     case Constant.olibKetish -> {
-                        olibKetish(message);
                         ordersService.changeMethodType(message.getChatId(), MethodType.OLIB_KETISH);
+                        olibKetish(message);
                         step.setStep(Step.OLIB_KETISH);
                         return;
                     }
@@ -149,6 +172,24 @@ public class FormalizationController {
                     case Constant.confirm -> {
                         checkOrder(message);
                         step.setStep(null);
+                        TelegramUsers saveUser = mainController.saveUser(message.getChatId());
+                        saveUser.setStep(null);
+                        TelegramUsers saveUser1 = ordersController.saveUser(message.getChatId());
+                        saveUser1.setStep(null);
+                        return;
+                    }
+                    case Constant.cancel -> {
+                        ordersService.deleteByUserId(message.getChatId());
+                        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                                "Savatchangiz tozalandi"));
+                        step.setStep(null);
+                        TelegramUsers saveUser = mainController.saveUser(message.getChatId());
+                        saveUser.setStep(Step.AddOrder);
+                        TelegramUsers saveUser1 = ordersController.saveUser(message.getChatId());
+                        saveUser1.setStep(null);
+
+                        menuController.orderMenu(message);
+
                         return;
                     }
                 }
@@ -164,6 +205,76 @@ public class FormalizationController {
 
     private void checkOrder(Message message) {
         /// TODO send to admin for checking orders
+        ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
+        replyKeyboardRemove.setRemoveKeyboard(true);
+
+        SendMessage sendMessage1 = new SendMessage();
+        sendMessage1.setText("⌛️");
+        sendMessage1.setChatId(message.getChatId());
+        sendMessage1.setReplyMarkup(replyKeyboardRemove);
+        Message send = myTelegramBot.send(sendMessage1);
+
+
+        List<AdminEntity> adminList=settingsService.getAdminList();
+
+        SendMessage sendMessage = new SendMessage();
+
+        sendMessage.setParseMode("MARKDOWN");
+
+        List<OrderMealEntity> oderMealList = orderMealService.getNOTCONFIRMEDOderMealList(message.getChatId());
+        OrdersEntity orders = ordersService.getByUserId(message.getChatId());
+        ProfileEntity mijoz = authService.findByUserId(message.getChatId());
+
+        StringBuilder text = new StringBuilder("\uD83D\uDCE5 *Buyurtma :* \n\n");
+
+        text.append("*Buyurtma raqami: ").append(orders.getId()).append("* \n");
+        for (OrderMealEntity entity : oderMealList) {
+            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append("\n\n");
+
+        }
+        text.append("*Buyurtma turi:* ");
+
+        if (orders.getMethodType().equals(MethodType.OLIB_KETISH)) {
+            text.append("_Olib ketish_");
+        } else {
+            text.append("\uD83D\uDEF5 _Yetkazib berish_");
+        }
+
+        text.append("\n *To'lov turi:* ");
+
+        if (orders.getPayment() == Payment.CASH) {
+            text.append("\uD83D\uDCB5 _Naqd_");
+        }
+        text.append("\n Mijoz: ").append(mijoz.getFullName());
+        text.append("\n Telefon raqam : ").append(mijoz.getPhone());
+
+        sendMessage.setText(text.toString());
+
+
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setText("✅ Qabul qilish");
+        button.setCallbackData("/save/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
+
+        InlineKeyboardButton button2 = new InlineKeyboardButton();
+        button2.setText("❌ Bekor qilish");
+        button2.setCallbackData("/cancel/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(button);
+        row.add(button2);
+
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        keyboard.add(row);
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+
+        sendMessage.setReplyMarkup(markup);
+
+        for (AdminEntity admin : adminList) {
+            sendMessage.setChatId(admin.getUserId());
+            myTelegramBot.send(sendMessage);
+        }
 
 
     }
@@ -203,7 +314,14 @@ public class FormalizationController {
             System.out.println("order");
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "Sizning savatingiz bo'sh \n, buyurtma berish uchun mahsulot tanlang"));
+
+            step.setStep(null);
+            TelegramUsers saveUser = mainController.saveUser(message.getChatId());
+            saveUser.setStep(Step.AddOrder);
+            TelegramUsers saveUser1 = ordersController.saveUser(message.getChatId());
+            saveUser1.setStep(null);
             menuController.orderMenu(message);
+
             return;
         }
 
@@ -305,7 +423,8 @@ public class FormalizationController {
                 ))));
     }
 
-    public void ordersList(Message message) {
+    public boolean ordersList(Message message) {
+        TelegramUsers step = saveUser(message.getChatId());
 
         List<OrderMealEntity> oderMealList = orderMealService.getNOTCONFIRMEDOderMealList(message.getChatId());
 
@@ -313,7 +432,18 @@ public class FormalizationController {
             System.out.println("order");
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "Sizning savatingiz bo'sh, buyurtma berish uchun mahsulot tanlang"));
+
+            step.setStep(null);
+            TelegramUsers saveUser = mainController.saveUser(message.getChatId());
+            saveUser.setStep(Step.AddOrder);
+
+
+            TelegramUsers order = ordersController.saveUser(message.getChatId());
+            order.setStep(Step.MAIN);
+
             menuController.orderMenu(message);
+
+            return false;
         }
 
         String savat = "\uD83D\uDCE5 Savat: \n\n";
@@ -340,7 +470,7 @@ public class FormalizationController {
                 )
         );
 
-
+        return true;
 //        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
 //                "\uD83D\uDCE5 Savat: \n\n" +
 //                        entity.getMeal_table().getName() + "\n" +

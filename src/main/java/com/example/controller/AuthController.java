@@ -110,6 +110,7 @@ public class AuthController {
                 profileEntity.setPhone(message.getContact().getPhoneNumber());
                 profileEntity.setUserId(message.getChatId());
                 profileEntity.setStatus(UserStatus.ACTIVE);
+                profileEntity.setRole(ProfileRole.USER);
 
                 authService.createProfile(profileEntity);
 

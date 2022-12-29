@@ -1,6 +1,7 @@
 package com.example.admin.service;
 import com.example.admin.repository.SupplierRepostoriy;
 import com.example.entity.AdminEntity;
+import com.example.enums.UserRole;
 import com.example.enums.UserStatus;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
@@ -77,7 +78,7 @@ public class SupplierService {
 
     public boolean supplierList(Message message) {
 
-        List<AdminEntity> adminEntityList = supplierRepostoriy.findByStatus(UserStatus.SUPPLIER);
+        List<AdminEntity> adminEntityList = supplierRepostoriy.findByRole(UserRole.SUPPLIER);
 
         if(adminEntityList.isEmpty()){
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -92,7 +93,7 @@ public class SupplierService {
                             "\uD83D\uDCCC  FullName : "+adminEntity.getFullname()+"\n" +
                             "\uD83D\uDD11  Password : "+adminEntity.getPassword()+"\n" +
                             "\uD83D\uDCDE  Phone : "+adminEntity.getPhone()+"\n" +
-                            "\uD83D\uDD30 Status : "+adminEntity.getStatus()));
+                            "\uD83D\uDD30  Role : "+adminEntity.getRole()));
         }
         return true;
     }

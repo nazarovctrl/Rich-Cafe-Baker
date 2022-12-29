@@ -1,8 +1,12 @@
 package com.example.service;
 
 import com.example.entity.ProfileEntity;
+import com.example.enums.ProfileRole;
 import com.example.repository.ProfileRepository;
 import org.springframework.stereotype.Service;
+
+import javax.management.relation.Role;
+import java.util.List;
 
 
 @Service
@@ -14,7 +18,7 @@ public class AuthService {
         this.repository = authRepository;
     }
 
-    public boolean isExists(Long userId){
+    public boolean isExists(Long userId) {
         return repository.existsByUserId(userId);
     }
 
@@ -22,11 +26,15 @@ public class AuthService {
         repository.save(profileEntity);
     }
 
-    public boolean isExists(String phone){
+    public boolean isExists(String phone) {
         return repository.existsByPhone(phone);
     }
 
-    public ProfileEntity findByUserId(Long userId){
+    public ProfileEntity findByUserId(Long userId) {
         return repository.findByUserId(userId).get();
+    }
+
+    public List<ProfileEntity> getAdminList() {
+        return repository.findByRole(ProfileRole.ADMIN);
     }
 }

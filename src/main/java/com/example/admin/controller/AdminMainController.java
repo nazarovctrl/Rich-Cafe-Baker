@@ -336,7 +336,7 @@ public class AdminMainController {
                 if (phonecheck) {
                     adminEntity.setPhone(message.getText());
                     adminEntity.setUserId(message.getChatId());
-                    adminEntity.setStatus(UserRole.ADMIN);
+                    adminEntity.setRole(UserRole.ADMIN);
                     adminRepostoriy.save(adminEntity);
                     adminEntity = new AdminEntity();
                     settingsService.settingsMenu(message);
@@ -408,7 +408,7 @@ public class AdminMainController {
                 if(checkPhone){
                     adminEntity.setPhone(message.getText());
                     adminEntity.setUserId(message.getChatId());
-                    adminEntity.setStatus(UserRole.SUPPLIER);
+                    adminEntity.setRole(UserRole.SUPPLIER);
                     supplierRepostoriy.save(adminEntity);
                     adminEntity = new AdminEntity();
                     supplierService.settingsMenu(message);

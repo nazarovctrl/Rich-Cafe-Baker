@@ -18,8 +18,10 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
 
     List<OrdersEntity> findByProfile_Id(Long userId);
 
+    @Modifying(clearAutomatically = true)
     @Transactional
-    void deleteByProfile_Id(Long userId);
+    @Query("update OrdersEntity o  set o.visible=false where o.profile.id=?1 and o.visible=true and o.status='NOT_CONFIRMED' ")
+    void deleteByProfile_Id(Integer profileId);
 
 
     Optional<OrdersEntity> findByProfileAndStatusAndVisibleTrue(ProfileEntity profile, OrdersStatus status);
@@ -27,7 +29,7 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update OrdersEntity o  set o.payment=?2 where o.profile.id=?1 and o.visible=true and o.status='NOT_CONFIRMED' ")
-    void changePayment(Integer id,Payment cash);
+    void changePayment(Integer id, Payment cash);
 
     @Modifying(clearAutomatically = true)
     @Transactional
@@ -40,5 +42,5 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
     void setLocation(Integer id, Double latitude, Double longitude);
 
 
-    OrdersEntity findByProfile_UserIdAndVisibleAndStatus(Long userId,boolean visible,OrdersStatus status);
+    OrdersEntity findByProfile_UserIdAndVisibleAndStatus(Long userId, boolean visible, OrdersStatus status);
 }

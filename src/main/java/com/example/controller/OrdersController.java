@@ -79,8 +79,8 @@ public class OrdersController {
 
                 case Constant.savat -> {
                     //savatni quyish
-                    formalizationController.ordersList(message);
-                    orders.setStep(Step.SAVAT);
+                    boolean b = formalizationController.ordersList(message);
+                    if (b) orders.setStep(Step.SAVAT);
                 }
 
                 case Constant.back -> {
@@ -144,11 +144,13 @@ public class OrdersController {
                 case Constant.back -> {
                     ordersMenuController.findMenuName(message, orders.getMenu());
                     orders.setStep(Step.MEAL);
+                    return;
                 }
 
                 case Constant.home -> {
                     menuController.mainMenu(message);
                     users.setStep(Step.MAIN);
+                    return;
                 }
 
             }
@@ -187,6 +189,7 @@ public class OrdersController {
 
             orders.setMeal(null);
             orders.setMenu(null);
+            return;
         }
 
 
