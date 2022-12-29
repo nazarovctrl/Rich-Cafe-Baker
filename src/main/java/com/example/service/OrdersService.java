@@ -39,7 +39,8 @@ public class OrdersService {
     }
 
     public void deleteByUserId(Long userId) {
-        ordersRepository.deleteByProfile_Id(userId);
+        ProfileEntity profile = authService.findByUserId(userId);
+        ordersRepository.deleteByProfile_Id(profile.getId());
     }
 
     public boolean isExists(Message message) {
@@ -74,8 +75,7 @@ public class OrdersService {
     }
 
     public OrdersEntity getByUserId(Long userId) {
-        OrdersEntity entity = ordersRepository.findByProfile_UserIdAndVisibleAndStatus(userId, true, OrdersStatus.NOT_CONFIRMED);
 
-        return entity;
+        return ordersRepository.findByProfile_UserIdAndVisibleAndStatus(userId, true, OrdersStatus.NOT_CONFIRMED);
     }
 }

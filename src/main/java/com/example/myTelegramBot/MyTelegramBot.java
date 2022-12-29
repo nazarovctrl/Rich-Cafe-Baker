@@ -1,5 +1,6 @@
 package com.example.myTelegramBot;
 
+import com.example.admin.controller.AdminController;
 import com.example.config.BotConfig;
 import com.example.controller.AuthController;
 import com.example.controller.FormalizationController;
@@ -22,15 +23,17 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
     private final MainController mainController;
     private final AuthController authController;
+    private final AdminController adminController;
     private final FormalizationController formalizationController;
     private final BotConfig botConfig;
 
     private List<TelegramUsers> usersList = new ArrayList<>();
 
 
-    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig) {
+    public MyTelegramBot(MainController mainController, AuthController authController, AdminController adminController, FormalizationController formalizationController, BotConfig botConfig) {
         this.mainController = mainController;
         this.authController = authController;
+        this.adminController = adminController;
         this.formalizationController = formalizationController;
 
         this.botConfig = botConfig;
@@ -39,6 +42,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
 
+        if (update.hasCallbackQuery()) {
+//            adminController.handleCalback(update.getCallbackQuery());
+        }
 
         if (update.hasMessage()) {
 
@@ -76,9 +82,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     }
 
 
-    public void send(SendMessage sendMessage) {
+    public Message send(SendMessage sendMessage) {
         try {
-            execute(sendMessage);
+            return execute(sendMessage);
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }

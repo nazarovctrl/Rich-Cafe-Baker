@@ -49,8 +49,7 @@ public class SendMsg {
         SendPhoto sendPhoto = new SendPhoto();
 
         InputFile input = new InputFile();
-        File file = new File(inputFile);
-        input.setMedia(file);
+        input.setMedia(inputFile);
 
 
         sendPhoto.setChatId(id);
