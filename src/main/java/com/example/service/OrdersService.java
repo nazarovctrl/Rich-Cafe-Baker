@@ -34,6 +34,7 @@ public class OrdersService {
     private final DeliveryService deliveryService;
 
     private final AuthService authService;
+
     @Lazy
 
     public OrdersService(OrdersRepository ordersRepository, MenuRepository menuRepository, MyTelegramBot myTelegramBot, MenuController menuController, OrdersService ordersService, DeliveryService deliveryService, AuthService authService) {

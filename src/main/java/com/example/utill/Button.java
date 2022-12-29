@@ -3,9 +3,11 @@ package com.example.utill;
 import com.example.entity.MealEntity;
 import com.example.entity.MenuEntity;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,5 +137,15 @@ public class Button {
 
 
         return replyKeyboardMarkup;
+    }
+
+    public static List<InlineKeyboardButton> location(Integer id) {
+        InlineKeyboardButton location = new InlineKeyboardButton();
+        location.setText("Yetkazib berish manzili");
+        location.setCallbackData("location/" + id);
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(location);
+
+        return row2;
     }
 }

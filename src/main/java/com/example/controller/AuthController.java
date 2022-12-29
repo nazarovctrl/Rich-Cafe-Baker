@@ -47,7 +47,7 @@ public class AuthController {
 
             if (users.getStep() == null) {
                 myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                        "Assalomualeykum Ismingiz va Familiyangizni kiriting"));
+                        "Assalomu alaykum Ismingiz va Familiyangizni kiriting"));
 
                 users.setStep(Step.NAME);
                 return;
@@ -69,13 +69,13 @@ public class AuthController {
 
                 if (!checkPhone(message.getText())) {
                     myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                            "Iltimos telefom raqamni to'g'ri kiriting ! "));
+                            "Iltimos telefon raqamni to'g'ri kiriting ! "));
                     return;
                 }
 
                 if (checkPhoneExists(message.getText())) {
                     myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                            "Bu raqam ruyhatdan o'tgan \n" +
+                            "Bu raqam ro'yxatdan o'tgan \n" +
                                     "Iltimos qaytadan kiriting "));
                     return;
                 }

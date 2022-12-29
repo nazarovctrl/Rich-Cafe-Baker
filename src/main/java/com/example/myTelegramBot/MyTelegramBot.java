@@ -142,6 +142,14 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         }
     }
 
+    public void send(SendLocation location) {
+        try {
+            execute(location);
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public TelegramUsers saveUser(Long chatId) {
 
         TelegramUsers user = usersList.stream().filter(u -> u.getChatId().equals(chatId)).findAny().orElse(null);

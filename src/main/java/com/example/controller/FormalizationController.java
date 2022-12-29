@@ -268,12 +268,20 @@ public class FormalizationController {
         button2.setText("❌ Bekor qilish");
         button2.setCallbackData("cancel/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
 
+
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(button);
         row.add(button2);
 
+
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(row);
+
+        if (orders.getMethodType().equals(MethodType.YETKAZIB_BERISH)) {
+            List<InlineKeyboardButton> row2 = Button.location(orders.getId());
+            keyboard.add(row2);
+        }
+
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);

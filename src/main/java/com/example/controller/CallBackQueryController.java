@@ -31,6 +31,11 @@ public class CallBackQueryController {
             return;
         }
 
+        if (split[0].equals("location")) {
+            deliveryService.getLocation(update);
+            return;
+        }
+
         ordersService.confirmOrder(update);
     }
 
