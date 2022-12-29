@@ -184,7 +184,7 @@ public class OrdersController {
 
             menuController.orderMenu(message);
 
-            orders.setStep(null);
+
             orders.setMeal(null);
             orders.setMenu(null);
         }

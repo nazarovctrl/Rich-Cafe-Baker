@@ -231,4 +231,9 @@ public class AdminMealsService {
         }
         return true;
     }
+
+    public void addPhoto(Message message) {
+        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                "Kiritmoqchi bulgan mahsulot rasmini yuboring"));
+    }
 }

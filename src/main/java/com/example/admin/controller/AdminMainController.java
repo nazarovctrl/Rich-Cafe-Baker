@@ -57,132 +57,135 @@ public class AdminMainController {
             user.setStep(Step.MAIN);
         }
 
-        switch (message.getText()) {
+        if (message.hasText()) {
 
-            case Constant.addMenu -> {
+            switch (message.getText()) {
 
-                menuService.menuName(message);
-                user.setStep(Step.ADD_MENU_NAME);
-                return;
-            }
-            case Constant.attachMealToMenu -> {
+                case Constant.addMenu -> {
 
-                mealsService.mealsName(message);
-                user.setStep(Step.ADD_MEALS_NAME);
-                return;
-            }
-            case Constant.deleteMeal -> {
-
-                boolean result = mealsService.menuList(message);
-
-                if(result) {
-                    mealsService.deleteMeals1(message);
-                    user.setStep(Step.MEALS_DELETE);
+                    menuService.menuName(message);
+                    user.setStep(Step.ADD_MENU_NAME);
                     return;
                 }
+                case Constant.attachMealToMenu -> {
 
-            }
-            case Constant.editePrice -> {
-
-                mealsService.menuList(message);
-                mealsService.updateMealsPrice1(message);
-                user.setStep(Step.MEALS_UPDATE_PRICE);
-                return;
-
-            }
-            case Constant.deleteMenu -> {
-
-                mealsService.menuList(message);
-                menuService.deleteMeals1(message);
-                user.setStep(Step.DELETE_MENU);
-                return;
-
-            }
-            case Constant.settings -> {
-
-                menuButtonUtil.settingMenu(message);
-                return;
-
-            }
-            case Constant.addAdmin -> {
-
-                settingsService.addAdminFullName(message);
-                user.setStep(Step.ADMIN_FULL_NAME);
-                return;
-
-            }
-            case Constant.deleteAdmin -> {
-
-                boolean result = settingsService.adminList(message);
-
-                if(result){
-                    settingsService.deleteAdmin(message);
-                    user.setStep(Step.DELETE_ADMIN);
-                }
-
-            }
-            case Constant.listOfAdmin -> {
-
-                settingsService.adminListMessage(message);
-                user.setStep(Step.ADMIN_LIST);
-
-            }
-            case Constant.mealsList -> {
-
-                boolean result = mealsService.menuList(message);
-
-                if(result){
-                    mealsService.mealsListMessage(message);
-                    user.setStep(Step.MEALS_LIST);
-                }
-
-            }
-            case Constant.menuList -> {
-
-                boolean result = mealsService.menuList(message);
-
-                if(result){
-                    mealsService.menuListGotovo(message);
-                }
-
-            }
-            case Constant.addSupplier -> {
-
-                supplierService.addSuplierFullName(message);
-                user.setStep(Step.SUPPLIER_NAME);
-                return;
-
-            }
-            case Constant.deleteSupplier -> {
-
-                boolean result =  supplierService.supplierList(message);
-
-                if(result){
-                    supplierService.deleteSupplierMessage(message);
-                    user.setStep(Step.DELETE_SUPPLIER);
+                    mealsService.mealsName(message);
+                    user.setStep(Step.ADD_MEALS_NAME);
                     return;
                 }
+                case Constant.deleteMeal -> {
+
+                    boolean result = mealsService.menuList(message);
+
+                    if (result) {
+                        mealsService.deleteMeals1(message);
+                        user.setStep(Step.MEALS_DELETE);
+                        return;
+                    }
+
+                }
+                case Constant.editePrice -> {
+
+                    mealsService.menuList(message);
+                    mealsService.updateMealsPrice1(message);
+                    user.setStep(Step.MEALS_UPDATE_PRICE);
+                    return;
+
+                }
+                case Constant.deleteMenu -> {
+
+                    mealsService.menuList(message);
+                    menuService.deleteMeals1(message);
+                    user.setStep(Step.DELETE_MENU);
+                    return;
+
+                }
+                case Constant.settings -> {
+
+                    menuButtonUtil.settingMenu(message);
+                    return;
+
+                }
+                case Constant.addAdmin -> {
+
+                    settingsService.addAdminFullName(message);
+                    user.setStep(Step.ADMIN_FULL_NAME);
+                    return;
+
+                }
+                case Constant.deleteAdmin -> {
+
+                    boolean result = settingsService.adminList(message);
+
+                    if (result) {
+                        settingsService.deleteAdmin(message);
+                        user.setStep(Step.DELETE_ADMIN);
+                    }
+
+                }
+                case Constant.listOfAdmin -> {
+
+                    settingsService.adminListMessage(message);
+                    user.setStep(Step.ADMIN_LIST);
+
+                }
+                case Constant.mealsList -> {
+
+                    boolean result = mealsService.menuList(message);
+
+                    if (result) {
+                        mealsService.mealsListMessage(message);
+                        user.setStep(Step.MEALS_LIST);
+                    }
+
+                }
+                case Constant.menuList -> {
+
+                    boolean result = mealsService.menuList(message);
+
+                    if (result) {
+                        mealsService.menuListGotovo(message);
+                    }
+
+                }
+                case Constant.addSupplier -> {
+
+                    supplierService.addSuplierFullName(message);
+                    user.setStep(Step.SUPPLIER_NAME);
+                    return;
+
+                }
+                case Constant.deleteSupplier -> {
+
+                    boolean result = supplierService.supplierList(message);
+
+                    if (result) {
+                        supplierService.deleteSupplierMessage(message);
+                        user.setStep(Step.DELETE_SUPPLIER);
+                        return;
+                    }
+
+                }
+                case Constant.supplierList -> {
+
+                    supplierService.supplierListMessage(message);
+                    user.setStep(Step.SUPPLIER_LIST);
+
+                }
+                case Constant.backMenu -> {
+                    menuButtonUtil.mainMenu(message);
+                    user.setStep(Step.MAIN);
+                    return;
+
+                }
+                case Constant.backSettingsPanel -> {
+                    menuButtonUtil.settingMenu(message);
+                    user.setStep(Step.MAIN);
+                    return;
+
+                }
 
             }
-            case Constant.supplierList -> {
-
-                supplierService.supplierListMessage(message);
-                user.setStep(Step.SUPPLIER_LIST);
-
-            }
-            case Constant.backMenu -> {
-                menuButtonUtil.mainMenu(message);
-                user.setStep(Step.MAIN);
-                return;
-
-            }
-            case Constant.backSettingsPanel -> {
-                menuButtonUtil.settingMenu(message);
-                user.setStep(Step.MAIN);
-                return;
-
-            }
-
         }
 
         switch (user.getStep()) {
@@ -216,11 +219,13 @@ public class AdminMainController {
             case ADD_MEALS_PRICE -> {
 
                 mealEntity.setPrice(Double.valueOf(message.getText()));
-                mealsService.menuList(message);
-                mealsService.addMealsMenu(message);
-                user.setStep(Step.MEALS_MENU_lIST);
+                mealsService.addPhoto(message);
+//                mealsService.addMealsMenu(message);
+                user.setStep(Step.ADD_MEALS_PHOTO);
 
             }
+
+
             case MEALS_MENU_lIST -> {
 
                 Optional<MenuEntity> menuId = mealsService.returnetMenuId(message);
@@ -433,6 +438,12 @@ public class AdminMainController {
 
         }
 
+        if (message.hasPhoto() && user.getStep().equals(Step.ADD_MEALS_PHOTO)){
+            mealEntity.setPhoto(message.getPhoto().get(0).getFileId());
+            mealsService.menuList(message);
+            mealsService.addMealsMenu(message);
+            user.setStep(Step.MEALS_MENU_lIST);
+        }
     }
     public TelegramUsers saveUser(Long chatId) {
 
