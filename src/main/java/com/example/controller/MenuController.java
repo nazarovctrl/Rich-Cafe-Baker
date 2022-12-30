@@ -5,6 +5,7 @@ import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.repository.MenuRepository;
 import com.example.service.AddMenuService;
+import com.example.service.OrdersService;
 import com.example.service.UserService;
 import com.example.utill.Button;
 import com.example.utill.SendMsg;
@@ -32,6 +33,9 @@ public class MenuController {
     @Autowired
     private AddMenuService menuService;
 
+    @Autowired
+    private OrdersService ordersService;
+
     public void mainMenu(Message message) {
 
         //Asosiy Menyu
@@ -46,6 +50,21 @@ public class MenuController {
                 ))
         ));
 
+    }
+
+    public void mainMenu(Long chatId) {
+
+        //Asosiy Menyu
+        myTelegramBot.send(SendMsg.sendMsg(chatId,
+                "Asosiy Menu", Button.markup(Button.rowList(Button.row(
+                                Button.button(Constant.addOrder)
+                        ),
+                        Button.row(Button.button(Constant.buyurtmalar),
+                                Button.button(Constant.settings)),
+                        Button.row(Button.button(Constant.about),
+                                Button.button(Constant.addComment))
+                ))
+        ));
 
     }
 
@@ -60,7 +79,6 @@ public class MenuController {
     }
 
     public void orderMenu(Message message) {
-
 
 
         List<MenuEntity> entityList = repository.findAll();
@@ -78,8 +96,8 @@ public class MenuController {
 
 
     public void order(Message message) {
+     ordersService.getOrdersHistory(message.getChatId());
 
-        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "Test Rejim"));
     }
 
     public void about(Message message) {

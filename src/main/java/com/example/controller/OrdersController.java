@@ -40,7 +40,6 @@ public class OrdersController {
     private final OrdersMenuController ordersMenuController;
     private final AuthService authService;
 
-    private OrdersEntity ordersEntity = new OrdersEntity();
 
 
     private List<TelegramUsers> usersList = new ArrayList<>();
@@ -94,6 +93,8 @@ public class OrdersController {
                     //bosh menu
                     menuController.mainMenu(message);
                     users.setStep(Step.MAIN);
+                    orders.setStep(null);
+                    return;
                 }
 
 
@@ -122,6 +123,14 @@ public class OrdersController {
                 case Constant.home -> {
                     menuController.mainMenu(message);
                     users.setStep(Step.MAIN);
+                    orders.setStep(null);
+                    return;
+                }
+                case Constant.savat -> {
+                    //savatni quyish
+                    boolean b = formalizationController.ordersList(message);
+                    if (b) orders.setStep(Step.SAVAT);
+                    return;
                 }
 
             }
@@ -141,6 +150,13 @@ public class OrdersController {
             String text = message.getText();
             switch (text) {
 
+                case Constant.savat -> {
+                    //savatni quyish
+                    boolean b = formalizationController.ordersList(message);
+                    if (b) orders.setStep(Step.SAVAT);
+                    return;
+                }
+
                 case Constant.back -> {
                     ordersMenuController.findMenuName(message, orders.getMenu());
                     orders.setStep(Step.MEAL);
@@ -150,6 +166,7 @@ public class OrdersController {
                 case Constant.home -> {
                     menuController.mainMenu(message);
                     users.setStep(Step.MAIN);
+                    orders.setStep(null);
                     return;
                 }
 
@@ -170,6 +187,7 @@ public class OrdersController {
                 return;
             }
 
+            OrdersEntity ordersEntity=new OrdersEntity();
             ordersEntity.setCreatedDate(LocalDateTime.now());
             ordersEntity.setProfile(authService.findByUserId(message.getChatId()));
             ordersEntity.setStatus(OrdersStatus.NOT_CONFIRMED);
@@ -184,11 +202,13 @@ public class OrdersController {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "Mahsulot savatchaga qoshildi, davom etamizmi?"));
 
+            orders.setStep(null);
+            orders.setMeal(null);
+            orders.setMenu(null);
             menuController.orderMenu(message);
 
 
-            orders.setMeal(null);
-            orders.setMenu(null);
+
             return;
         }
 

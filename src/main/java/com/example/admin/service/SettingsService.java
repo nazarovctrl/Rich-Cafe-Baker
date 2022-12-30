@@ -9,6 +9,7 @@ import com.example.myTelegramBot.MyTelegramBot;
 import com.example.utill.Button;
 import com.example.utill.SendMsg;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -18,10 +19,14 @@ import java.util.Optional;
 @Service
 public class SettingsService {
 
-    @Autowired
-    private MyTelegramBot myTelegramBot;
-    @Autowired
-    private AdminRepository adminRepostoriy;
+    private final MyTelegramBot myTelegramBot;
+    private final AdminRepository adminRepostoriy;
+
+    @Lazy
+    public SettingsService(MyTelegramBot myTelegramBot, AdminRepository adminRepostoriy) {
+        this.myTelegramBot = myTelegramBot;
+        this.adminRepostoriy = adminRepostoriy;
+    }
 
     public void addAdminFullName(Message message) {
 
@@ -176,5 +181,9 @@ public class SettingsService {
 
     public List<AdminEntity> getAdminList() {
         return adminRepostoriy.findByRole(UserRole.ADMIN);
+    }
+
+    public boolean isAdmin(Long userId) {
+        return adminRepostoriy.existsByUserIdAndRole(userId,UserRole.ADMIN);
     }
 }

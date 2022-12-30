@@ -15,8 +15,7 @@ import com.example.enums.Step;
 import com.example.enums.UserRole;
 import com.example.interfaces.Constant;
 import com.example.step.TelegramUsers;
-
-import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.LinkedList;
@@ -27,30 +26,27 @@ import java.util.Optional;
 public class AdminMainController {
 
     private List<TelegramUsers> usersList = new LinkedList<>();
-    private final MenuButtonUtil menuButtonUtil;
-    private final MenuService menuService;
-    private final AdminMenuRepository menuRepository;
-    private final AdminMealsService mealsService;
-    private final AdminMealsRepository mealsRepository;
-    private final SettingsService settingsService;
-    private final AdminRepository adminRepository;
-    private final SupplierService supplierService;
-    private final SupplierRepostoriy supplierRepostoriy;
+    @Autowired
+    private MenuButtonUtil menuButtonUtil;
+    @Autowired
+    private MenuService menuService;
+    @Autowired
+    private AdminMenuRepository menuRepostoriy;
+    @Autowired
+    private AdminMealsService mealsService;
+    @Autowired
+    private AdminMealsRepository mealsRepository;
+    @Autowired
+    private SettingsService settingsService;
+    @Autowired
+    private AdminRepository adminRepostoriy;
+    @Autowired
+    private SupplierService supplierService;
+    @Autowired
+    private SupplierRepostoriy supplierRepostoriy;
     private MealEntity mealEntity = new MealEntity();
     private MenuEntity menuEntity = new MenuEntity();
     private AdminEntity adminEntity = new AdminEntity();
-@Lazy
-    public AdminMainController(MenuButtonUtil menuButtonUtil, MenuService menuService, AdminMenuRepository menuRepostoriy, AdminMealsService mealsService, AdminMealsRepository mealsRepository, SettingsService settingsService, AdminRepository adminRepostoriy, SupplierService supplierService, SupplierRepostoriy supplierRepostoriy) {
-        this.menuButtonUtil = menuButtonUtil;
-        this.menuService = menuService;
-        this.menuRepository = menuRepostoriy;
-        this.mealsService = mealsService;
-        this.mealsRepository = mealsRepository;
-        this.settingsService = settingsService;
-        this.adminRepository = adminRepostoriy;
-        this.supplierService = supplierService;
-        this.supplierRepostoriy = supplierRepostoriy;
-    }
 
     public void handle(Message message) {
 

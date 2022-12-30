@@ -15,5 +15,6 @@ public interface AdminRepository extends CrudRepository<AdminEntity,Integer> {
     Optional<AdminEntity> findByPassword(String password);
 
     Optional<AdminEntity> findByPhone(String text);
+    boolean existsByUserIdAndRole(Long userId,UserRole role);
 
 }

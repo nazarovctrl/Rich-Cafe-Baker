@@ -43,6 +43,10 @@ public class OrdersEntity {
     private MethodType methodType;
 
 
+    @ManyToOne
+    @JoinColumn(name = "supplier_id")
+    private AdminEntity supplier;
+
     @Column
     private Boolean visible = true;
 

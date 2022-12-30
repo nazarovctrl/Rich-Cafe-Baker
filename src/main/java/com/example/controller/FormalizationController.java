@@ -7,6 +7,7 @@ import com.example.entity.OrderMealEntity;
 import com.example.entity.OrdersEntity;
 import com.example.entity.ProfileEntity;
 import com.example.enums.MethodType;
+import com.example.enums.OrdersStatus;
 import com.example.enums.Payment;
 import com.example.enums.Step;
 import com.example.interfaces.Constant;
@@ -91,7 +92,9 @@ public class FormalizationController {
                 case Constant.back -> {
                     if (step.getStep() == null || step.getStep().equals(Step.SAVAT)) {
                         menuController.orderMenu(message);
-                        step.setStep(Step.MAIN);
+                        TelegramUsers saveUser = ordersController.saveUser(message.getChatId());
+                        saveUser.setStep(null);
+                        step.setStep(null);
                         return;
                     }
                     if (step.getStep().equals(Step.TYPE_METHOD)) {
@@ -204,7 +207,6 @@ public class FormalizationController {
     }
 
     private void checkOrder(Message message) {
-        /// TODO send to admin for checking orders
         ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
         replyKeyboardRemove.setRemoveKeyboard(true);
 
@@ -215,7 +217,7 @@ public class FormalizationController {
         Message send = myTelegramBot.send(sendMessage1);
 
 
-        List<AdminEntity> adminList=settingsService.getAdminList();
+        List<AdminEntity> adminList = settingsService.getAdminList();
 
         SendMessage sendMessage = new SendMessage();
 
@@ -223,16 +225,22 @@ public class FormalizationController {
 
         List<OrderMealEntity> oderMealList = orderMealService.getNOTCONFIRMEDOderMealList(message.getChatId());
         OrdersEntity orders = ordersService.getByUserId(message.getChatId());
+        ordersService.changeStatus(message.getChatId(), OrdersStatus.CHECKING);
+
         ProfileEntity mijoz = authService.findByUserId(message.getChatId());
 
         StringBuilder text = new StringBuilder("\uD83D\uDCE5 *Buyurtma :* \n\n");
 
         text.append("*Buyurtma raqami: ").append(orders.getId()).append("* \n");
-        for (OrderMealEntity entity : oderMealList) {
-            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append("\n\n");
 
+        double total = 0;
+        for (OrderMealEntity entity : oderMealList) {
+            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append(" so'm \n\n");
+
+            total += entity.getMeal().getPrice() * entity.getQuantity();
         }
-        text.append("*Buyurtma turi:* ");
+        text.append("\n *Jami: ").append(total).append(" so'm*");
+        text.append("\n *Buyurtma turi:* ");
 
         if (orders.getMethodType().equals(MethodType.OLIB_KETISH)) {
             text.append("_Olib ketish_");
@@ -251,20 +259,19 @@ public class FormalizationController {
         sendMessage.setText(text.toString());
 
 
-        InlineKeyboardButton button = new InlineKeyboardButton();
-        button.setText("✅ Qabul qilish");
-        button.setCallbackData("/save/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
-
-        InlineKeyboardButton button2 = new InlineKeyboardButton();
-        button2.setText("❌ Bekor qilish");
-        button2.setCallbackData("/cancel/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
-
         List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(button);
-        row.add(button2);
+        row.add(Button.save(mijoz.getUserId(), orders.getId(), send.getMessageId()));
+        row.add(Button.cancel(mijoz.getUserId(), orders.getId(), send.getMessageId()));
+
 
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(row);
+
+        if (orders.getMethodType().equals(MethodType.YETKAZIB_BERISH)) {
+            List<InlineKeyboardButton> row2 = Button.locationForAdmin(orders.getId(),send.getMessageId());
+            keyboard.add(row2);
+        }
+
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         markup.setKeyboard(keyboard);
@@ -339,15 +346,17 @@ public class FormalizationController {
 
         String savat = "\uD83D\uDCE5 *Buyurtma :* \n\n";
 
+        double total = 0;
         for (OrderMealEntity entity : oderMealList) {
 
             savat += entity.getMeal().getName() + "\n" +
                     entity.getQuantity() + " x " + entity.getMeal().getPrice() + " = " +
-                    entity.getMeal().getPrice() * entity.getQuantity() + "\n\n";
-
+                    entity.getMeal().getPrice() * entity.getQuantity() + " so'm \n\n";
+            total += entity.getMeal().getPrice() * entity.getQuantity();
 
         }
-        savat += "*Buyurtma turi:* ";
+        savat += "\n *Jami: " + total + " so'm*";
+        savat += "\n *Buyurtma turi:* ";
 
         if (orders.getMethodType().equals(MethodType.OLIB_KETISH)) {
             savat += "_Olib ketish_";
@@ -447,16 +456,18 @@ public class FormalizationController {
         }
 
         String savat = "\uD83D\uDCE5 Savat: \n\n";
+        double total = 0;
 
         for (OrderMealEntity entity : oderMealList) {
 
             savat += entity.getMeal().getName() + "\n" +
                     entity.getQuantity() + " x " + entity.getMeal().getPrice() + " = " +
-                    entity.getMeal().getPrice() * entity.getQuantity() + "\n\n";
+                    entity.getMeal().getPrice() * entity.getQuantity() + " so'm \n\n";
 
+            total += entity.getMeal().getPrice() * entity.getQuantity();
 
         }
-
+        savat += "\n Jami: " + total + " so'm";
         myTelegramBot.send(
                 SendMsg.sendMsg(
                         message.getChatId(),

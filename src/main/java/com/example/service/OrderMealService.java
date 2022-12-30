@@ -29,4 +29,8 @@ public class OrderMealService {
 
         return repository.getNotConfirmedListByUserId(chatId);
     }
+
+    public List<OrderMealEntity> getListByOrderId(Integer id) {
+        return repository.findByOrderId(id);
+    }
 }

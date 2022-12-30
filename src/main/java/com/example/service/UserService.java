@@ -17,11 +17,11 @@ public class UserService {
         Optional<ProfileEntity> optional = userRepository.getByUserId(id);
         ProfileEntity entity = optional.get();
 
-        Long userId= entity.getUserId();
+        Long userId = entity.getUserId();
         System.out.println(userId);
 
-            if (userId.equals(id)) {
-                return true;
+        if (userId.equals(id)) {
+            return true;
         }
         return false;
     }
@@ -31,7 +31,14 @@ public class UserService {
     }
 
 
+    public void changePhone(Long userId, String phoneNumber) {
+        Optional<ProfileEntity> optional = userRepository.findByUserId(userId);
+        if (optional.isEmpty()) {
+            return;
+        }
+        ProfileEntity profile = optional.get();
+        profile.setPhone(phoneNumber);
 
-
-
+        userRepository.save(profile);
+    }
 }
