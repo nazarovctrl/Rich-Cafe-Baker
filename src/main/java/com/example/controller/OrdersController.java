@@ -166,6 +166,7 @@ public class OrdersController {
                 case Constant.home -> {
                     menuController.mainMenu(message);
                     users.setStep(Step.MAIN);
+                    orders.setStep(null);
                     return;
                 }
 

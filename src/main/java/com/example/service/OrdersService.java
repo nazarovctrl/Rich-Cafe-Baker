@@ -211,7 +211,7 @@ public class OrdersService {
             List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
             markup.setKeyboard(keyboard);
 
-            LocationMessageDTO messageDTO = deliveryService.getLocationMessageDTO(update,orderId);
+            LocationMessageDTO messageDTO = deliveryService.getLocationMessageDTO(update, orderId);
             if (messageDTO != null) {
                 DeleteMessage deleteMessage = new DeleteMessage();
                 deleteMessage.setChatId(update.getCallbackQuery().getFrom().getId());
@@ -221,7 +221,7 @@ public class OrdersService {
             }
 
 
-            List<InlineKeyboardButton> row = Button.location(orderId,false);
+            List<InlineKeyboardButton> row = Button.location(orderId, false);
             keyboard.add(row);
             editMessage(update, markup);
 
@@ -316,5 +316,9 @@ public class OrdersService {
 
         myTelegramBot.send(sendMessage);
 
+    }
+
+    public List<OrdersEntity> getListBySupplierUserId(Long userId, OrdersStatus status) {
+        return ordersRepository.findBySupplierUserId(userId, status);
     }
 }

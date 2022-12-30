@@ -38,7 +38,7 @@ public class AdminEntity {
     private UserRole role;
 
     @Column
-    private Boolean busy;
+    private Boolean busy=false;
 
 
 }

@@ -12,21 +12,14 @@ import com.example.admin.util.MenuButtonUtil;
 import com.example.entity.AdminEntity;
 import com.example.entity.MealEntity;
 import com.example.entity.MenuEntity;
-import com.example.entity.OrdersEntity;
-import com.example.enums.OrdersStatus;
 import com.example.enums.Step;
 import com.example.enums.UserRole;
 import com.example.interfaces.Constant;
 import com.example.service.OrdersService;
 import com.example.step.TelegramUsers;
-import com.example.utill.SendMsg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -411,7 +404,7 @@ public class AdminMainController {
             }
             case SUPPLIER_PHONE -> {
 
-                boolean checkPhoneDataBase = supplierService.chackPhoneDataBase(message);
+                boolean checkPhoneDataBase = supplierService.checkPhoneDataBase(message);
                 boolean checkPhone = supplierService.checkPhpone(message);
 
                 if (checkPhoneDataBase) {

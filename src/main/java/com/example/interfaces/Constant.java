@@ -61,6 +61,9 @@ public interface Constant {
     String deleteSupplier = "\uD83D\uDDD1 Dastavchik o'chirish";
     String supplierList = "\uD83D\uDCD6 Dastavchiklar ro'yxati";
 
-
-
+    String holat = "\uD83D\uDD16 Holat";
+    String busy = "\uD83D\uDD34 band";
+    String empty = "\uD83D\uDFE2 bo'sh";
+    String notDelivered = "\uD83D\uDEF5 ⌛️Buyurtmalar";
+    String delivered = "\uD83D\uDC64\uD83D\uDCE6 Buyurtmalar";
 }

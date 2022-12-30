@@ -59,4 +59,8 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
 
     @Query("from OrdersEntity o where o.profile.userId=?1 and o.status=?2 and o.visible=true ")
     List<OrdersEntity> getOrdersHistoryListByUserId(Long userId, OrdersStatus status);
+
+
+    @Query("from OrdersEntity o where o.supplier.userId=?1 and o.status=?2 order by o.createdDate ")
+    List<OrdersEntity> findBySupplierUserId(Long userId, OrdersStatus status);
 }

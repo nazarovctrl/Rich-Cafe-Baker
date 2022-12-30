@@ -3,12 +3,12 @@ package com.example.admin.service;
 import com.example.admin.repository.SupplierRepostoriy;
 import com.example.entity.AdminEntity;
 import com.example.enums.UserRole;
-import com.example.enums.UserStatus;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.utill.Button;
 import com.example.utill.SendMsg;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -18,10 +18,14 @@ import java.util.Optional;
 @Service
 public class SupplierService {
 
-    @Autowired
-    private MyTelegramBot myTelegramBot;
-    @Autowired
-    private SupplierRepostoriy supplierRepostoriy;
+    private final MyTelegramBot myTelegramBot;
+    private final SupplierRepostoriy supplierRepostoriy;
+
+    @Lazy
+    public SupplierService(MyTelegramBot myTelegramBot, SupplierRepostoriy supplierRepostoriy) {
+        this.myTelegramBot = myTelegramBot;
+        this.supplierRepostoriy = supplierRepostoriy;
+    }
 
 
     public void addSuplierFullName(Message message) {
@@ -153,7 +157,7 @@ public class SupplierService {
         return false;
     }
 
-    public boolean chackPhoneDataBase(Message message) {
+    public boolean checkPhoneDataBase(Message message) {
 
         Optional<AdminEntity> optional = supplierRepostoriy.findByPhone(message.getText());
 
@@ -173,5 +177,13 @@ public class SupplierService {
 
     public AdminEntity getByUserId(Long userId) {
         return supplierRepostoriy.findByUserId(userId);
+    }
+
+    public boolean isSupplier(Long userId) {
+        return supplierRepostoriy.existsByUserIdAndRole(userId, UserRole.SUPPLIER);
+    }
+
+    public void changeStatus(Long userId, boolean busy) {
+        supplierRepostoriy.changeStatus(userId, busy);
     }
 }

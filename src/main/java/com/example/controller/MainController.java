@@ -7,6 +7,7 @@ import com.example.enums.Step;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.service.AuthService;
+import com.example.service.UserService;
 import com.example.step.TelegramUsers;
 import com.example.utill.Button;
 import com.example.utill.SendMsg;
@@ -25,24 +26,25 @@ public class MainController {
     private final SettingsService settingsService;
     private final OrdersController ordersController;
     private final AuthService authService;
+    private final UserService userService;
 
     public Step step = Step.MAIN;
 
     List<TelegramUsers> usersList = new ArrayList<>();
 
     @Lazy
-    public MainController(MenuController menuController, MyTelegramBot myTelegramBot, SettingsService settingsService, OrdersController ordersController, AuthService authService) {
+    public MainController(MenuController menuController, MyTelegramBot myTelegramBot, SettingsService settingsService, OrdersController ordersController, AuthService authService, UserService userService) {
         this.menuController = menuController;
         this.myTelegramBot = myTelegramBot;
         this.settingsService = settingsService;
         this.ordersController = ordersController;
 
         this.authService = authService;
+        this.userService = userService;
     }
 
 
     public void start(Message message) {
-
 
         TelegramUsers users = saveUser(message.getChatId());
         if (message.hasText()) {
@@ -70,20 +72,18 @@ public class MainController {
                 switch (text) {
                     case Constant.addOrder -> {
                         menuController.orderMenu(message);
-//                        addMenuService.menuList(message);
                         users.setStep(Step.AddOrder);
 
                     }
 
                     case Constant.buyurtmalar -> {
                         menuController.order(message);
-//                        step = StepStatus.ORDER;
 
                     }
                     case Constant.settings -> {
                         //sozlanmalar
-                        menuController.settings(message);
                         users.setStep(step = Step.SETTINGS);
+                        menuController.settings(message);
 
                     }
 
@@ -98,14 +98,6 @@ public class MainController {
                         return;
                     }
 
-
-//                    default -> {
-//                        SendMessage sendMessage = new SendMessage();
-//                        sendMessage.setChatId(message.getChatId());
-//                        sendMessage.setText("Mavjud emas");
-//
-//                        myTelegramBot.send(sendMessage);
-//                    }
                 }
                 return;
 
@@ -125,7 +117,7 @@ public class MainController {
                         //phone uzgartirish
                         menuController.contactButton(message);
                         users.setStep(Step.PHONE);
-                        break;
+
                     }
                     case Constant.back -> {
                         menuController.mainMenu(message);
@@ -188,5 +180,19 @@ public class MainController {
         usersList.add(users);
 
         return users;
+    }
+
+    public void changePhone(Message message) {
+        TelegramUsers user = saveUser(message.getChatId());
+        if (!user.getStep().equals(Step.PHONE)) {
+            return;
+        }
+
+
+        userService.changePhone(user.getChatId(), message.getContact().getPhoneNumber());
+
+        myTelegramBot.send(SendMsg.sendMsg(user.getChatId(), "\uD83D\uDCDE Telefon raqam o'zgartildi"));
+        user.setStep(null);
+        menuController.mainMenu(message);
     }
 }

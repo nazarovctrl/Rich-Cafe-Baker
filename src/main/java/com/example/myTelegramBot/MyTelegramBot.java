@@ -2,6 +2,9 @@ package com.example.myTelegramBot;
 
 
 import com.example.admin.controller.AdminMainController;
+import com.example.admin.controller.SupplierController;
+import com.example.admin.service.SettingsService;
+import com.example.admin.service.SupplierService;
 import com.example.config.BotConfig;
 import com.example.controller.AuthController;
 import com.example.controller.CallBackQueryController;
@@ -31,16 +34,22 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
     private final AdminMainController adminController;
     private final CallBackQueryController callBackQueryController;
+    private final SettingsService settingsService;
+    private final SupplierService supplierService;
+    private final SupplierController supplierController;
 
     private List<TelegramUsers> usersList = new ArrayList<>();
 
-    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController, CallBackQueryController callBackQueryController) {
+    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController, CallBackQueryController callBackQueryController, SettingsService settingsService, SupplierService supplierService, SupplierController supplierController) {
         this.mainController = mainController;
         this.authController = authController;
         this.formalizationController = formalizationController;
         this.botConfig = botConfig;
         this.adminController = adminController;
         this.callBackQueryController = callBackQueryController;
+        this.settingsService = settingsService;
+        this.supplierService = supplierService;
+        this.supplierController = supplierController;
     }
 
 
@@ -48,29 +57,33 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
 
 
-        if (update.hasCallbackQuery()) {
-            callBackQueryController.handleCallbackQuery(update);
-        }
-
-
         if (update.hasMessage()) {
-
 
             Message message = update.getMessage();
 
             Long userId = message.getChatId();
 
-
-            if (message.getChatId() == 912723931) {
+            if (settingsService.isAdmin(userId)) {
                 adminController.handle(message);
                 return;
             }
 
-            TelegramUsers users = saveUser(message.getChatId());
+            if (supplierService.isSupplier(userId)) {
+                supplierController.handle(message);
+                return;
+            }
+
+
+            saveUser(message.getChatId());
 
 
             if (message.hasContact() && !authController.isExists(message)) {
                 authController.handle(message);
+            }
+
+            if (message.hasContact()){
+                mainController.changePhone(message);
+                return;
             }
 
 
@@ -80,6 +93,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                     return;
                 }
                 mainController.start(message);
+                return;
             }
 
             if (message.hasLocation()) {
@@ -88,6 +102,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             }
 
 
+        }
+        if (update.hasCallbackQuery()) {
+            callBackQueryController.handleCallbackQuery(update);
         }
 
 
@@ -156,13 +173,6 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         if (user != null) {
             return user;
         }
-
-//        for (TelegramUsers users : usersList) {
-//            if (users.getChatId().equals(chatId)) {
-//                return users;
-//            }
-//        }
-
 
         TelegramUsers users = new TelegramUsers();
         users.setChatId(chatId);
