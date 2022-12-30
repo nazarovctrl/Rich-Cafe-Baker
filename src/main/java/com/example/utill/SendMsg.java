@@ -4,6 +4,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 
 import java.io.File;
@@ -23,6 +24,14 @@ public class SendMsg {
         sendMessage.setText(text);
         sendMessage.setReplyMarkup(markup);
 
+        return sendMessage;
+    }
+
+    public static SendMessage sendMsg(Long id, String text,  InlineKeyboardMarkup markup) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(id);
+        sendMessage.setText(text);
+        sendMessage.setReplyMarkup(markup);
         return sendMessage;
     }
 

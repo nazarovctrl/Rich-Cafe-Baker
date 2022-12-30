@@ -15,7 +15,8 @@ import com.example.enums.Step;
 import com.example.enums.UserRole;
 import com.example.interfaces.Constant;
 import com.example.step.TelegramUsers;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.LinkedList;
@@ -26,33 +27,36 @@ import java.util.Optional;
 public class AdminMainController {
 
     private List<TelegramUsers> usersList = new LinkedList<>();
-    @Autowired
-    private MenuButtonUtil menuButtonUtil;
-    @Autowired
-    private MenuService menuService;
-    @Autowired
-    private AdminMenuRepository menuRepostoriy;
-    @Autowired
-    private AdminMealsService mealsService;
-    @Autowired
-    private AdminMealsRepository mealsRepository;
-    @Autowired
-    private SettingsService settingsService;
-    @Autowired
-    private AdminRepository adminRepostoriy;
-    @Autowired
-    private SupplierService supplierService;
-    @Autowired
-    private SupplierRepostoriy supplierRepostoriy;
+    private final MenuButtonUtil menuButtonUtil;
+    private final MenuService menuService;
+    private final AdminMenuRepository menuRepository;
+    private final AdminMealsService mealsService;
+    private final AdminMealsRepository mealsRepository;
+    private final SettingsService settingsService;
+    private final AdminRepository adminRepository;
+    private final SupplierService supplierService;
+    private final SupplierRepostoriy supplierRepostoriy;
     private MealEntity mealEntity = new MealEntity();
     private MenuEntity menuEntity = new MenuEntity();
     private AdminEntity adminEntity = new AdminEntity();
+@Lazy
+    public AdminMainController(MenuButtonUtil menuButtonUtil, MenuService menuService, AdminMenuRepository menuRepostoriy, AdminMealsService mealsService, AdminMealsRepository mealsRepository, SettingsService settingsService, AdminRepository adminRepostoriy, SupplierService supplierService, SupplierRepostoriy supplierRepostoriy) {
+        this.menuButtonUtil = menuButtonUtil;
+        this.menuService = menuService;
+        this.menuRepository = menuRepostoriy;
+        this.mealsService = mealsService;
+        this.mealsRepository = mealsRepository;
+        this.settingsService = settingsService;
+        this.adminRepository = adminRepostoriy;
+        this.supplierService = supplierService;
+        this.supplierRepostoriy = supplierRepostoriy;
+    }
 
     public void handle(Message message) {
 
         TelegramUsers user = saveUser(message.getChatId());
 
-        if (message.hasText() && message.getText().equals("/start") && user.getStep() == null) {
+        if (message.hasText() && message.getText().equals("/start") || user.getStep() == null) {
             menuButtonUtil.mainMenu(message);
             user.setStep(Step.MAIN);
         }
@@ -121,6 +125,7 @@ public class AdminMainController {
                         settingsService.deleteAdmin(message);
                         user.setStep(Step.DELETE_ADMIN);
                     }
+                    return;
 
                 }
                 case Constant.listOfAdmin -> {
@@ -128,6 +133,7 @@ public class AdminMainController {
                     settingsService.adminListMessage(message);
                     user.setStep(Step.ADMIN_LIST);
 
+                    return;
                 }
                 case Constant.mealsList -> {
 
@@ -138,6 +144,7 @@ public class AdminMainController {
                         user.setStep(Step.MEALS_LIST);
                     }
 
+                    return;
                 }
                 case Constant.menuList -> {
 
@@ -146,7 +153,7 @@ public class AdminMainController {
                     if (result) {
                         mealsService.menuListGotovo(message);
                     }
-
+return;
                 }
                 case Constant.addSupplier -> {
 
@@ -199,7 +206,7 @@ public class AdminMainController {
                 }
 
                 menuEntity.setName(message.getText());
-                menuRepostoriy.save(menuEntity);
+                menuRepository.save(menuEntity);
                 menuService.saveMenu(message);
                 user.setStep(Step.MAIN);
                 menuEntity = new MenuEntity();
@@ -335,9 +342,9 @@ public class AdminMainController {
 
                 if (phonecheck) {
                     adminEntity.setPhone(message.getText());
-                    adminEntity.setUserId(message.getChatId());
+                    adminEntity.setUserId(null);
                     adminEntity.setRole(UserRole.ADMIN);
-                    adminRepostoriy.save(adminEntity);
+                    adminRepository.save(adminEntity);
                     adminEntity = new AdminEntity();
                     settingsService.settingsMenu(message);
                     user.setStep(Step.MAIN);
@@ -407,7 +414,7 @@ public class AdminMainController {
 
                 if(checkPhone){
                     adminEntity.setPhone(message.getText());
-                    adminEntity.setUserId(message.getChatId());
+                    adminEntity.setUserId(null);
                     adminEntity.setRole(UserRole.SUPPLIER);
                     supplierRepostoriy.save(adminEntity);
                     adminEntity = new AdminEntity();

@@ -7,8 +7,10 @@ import com.example.entity.MenuEntity;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.utill.Button;
+import com.example.utill.IdCheckUtil;
 import com.example.utill.SendMsg;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -18,12 +20,20 @@ import java.util.Optional;
 @Service
 public class AdminMealsService {
 
+    private final MyTelegramBot myTelegramBot;
+    private AdminMenuRepository menuRepository;
+    private AdminMealsRepository mealsRepository;
+@Lazy
+    public AdminMealsService(MyTelegramBot myTelegramBot) {
+        this.myTelegramBot = myTelegramBot;
+    }
+
     @Autowired
-    private MyTelegramBot myTelegramBot;
-    @Autowired
-    private AdminMenuRepository menuRepostoriy;
-    @Autowired
-    private AdminMealsRepository mealsRepostoriy;
+    public AdminMealsService(MyTelegramBot myTelegramBot, AdminMenuRepository menuRepostoriy, AdminMealsRepository mealsRepostoriy) {
+        this.myTelegramBot = myTelegramBot;
+        this.menuRepository = menuRepostoriy;
+        this.mealsRepository = mealsRepostoriy;
+    }
 
     public void mealsPrice(Message message){
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -36,7 +46,7 @@ public class AdminMealsService {
     }
     public boolean menuList(Message message){
 
-        List<MenuEntity> entityList =  menuRepostoriy.findAll();
+        List<MenuEntity> entityList =  menuRepository.findAll();
 
         if(entityList.isEmpty()){
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -60,7 +70,7 @@ public class AdminMealsService {
     }
     public Optional<MenuEntity> returnetMenuId(Message message){
 
-        Optional<MenuEntity> optional = menuRepostoriy.findById(Integer.valueOf(message.getText()));
+        Optional<MenuEntity> optional = menuRepository.findById(Integer.valueOf(message.getText()));
 
         if(optional.isEmpty()){
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -71,7 +81,7 @@ public class AdminMealsService {
     }
     public boolean mealesList(Message message){
 
-        List<MealEntity> entityList =  mealsRepostoriy.findByMenu_Id(Integer.valueOf(message.getText()));
+        List<MealEntity> entityList =  mealsRepository.findByMenu_Id(Integer.valueOf(message.getText()));
 
         if(entityList.isEmpty()){
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -101,14 +111,14 @@ public class AdminMealsService {
     }
     public boolean deleteMeal3(Message message) {
 
-        Optional<MealEntity> optional = mealsRepostoriy.findById(Integer.valueOf(message.getText()));
+        Optional<MealEntity> optional = mealsRepository.findById(Integer.valueOf(message.getText()));
         if (optional.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "❌ Kechirasiz bunaqa ID mavjud emas boshqatan urining ! "));
             return false;
         }
 
-        mealsRepostoriy.deleteById(Math.toIntExact(optional.get().getId()));
+        mealsRepository.deleteById(Math.toIntExact(optional.get().getId()));
         return true;
     }
     public void saveMenu(Message message) {
@@ -123,7 +133,7 @@ public class AdminMealsService {
     }
     public boolean mealesListUpdate(Message message){
 
-        List<MealEntity> entityList =  mealsRepostoriy.findByMenu_Id(Integer.valueOf(message.getText()));
+        List<MealEntity> entityList =  mealsRepository.findByMenu_Id(Integer.valueOf(message.getText()));
 
         if(entityList.isEmpty()){
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -148,7 +158,7 @@ public class AdminMealsService {
     }
     public Optional<MealEntity> updateMealsById(Message message) {
 
-        Optional<MealEntity> optional = mealsRepostoriy.findById(Integer.valueOf(message.getText()));
+        Optional<MealEntity> optional = mealsRepository.findById(Integer.valueOf(message.getText()));
         if(optional.isEmpty()){
             return null;
         }
@@ -187,7 +197,13 @@ public class AdminMealsService {
     }
     public boolean mealsListAdmin(Message message) {
 
-        List<MealEntity> entityList =  mealsRepostoriy.findByMenu_Id(Integer.valueOf(message.getText()));
+        if (!IdCheckUtil.check(message.getText())){
+            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                    "Iltimos Idni to'g'ri kiriting"));
+            return false;
+        }
+
+        List<MealEntity> entityList =  mealsRepository.findByMenu_Id(Integer.valueOf(message.getText()));
 
         if(entityList.isEmpty()){
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -221,7 +237,7 @@ public class AdminMealsService {
 
     public boolean checkMealsName(Message message) {
 
-        Optional<MealEntity> optional = mealsRepostoriy.findByName(message.getText());
+        Optional<MealEntity> optional = mealsRepository.findByName(message.getText());
 
         if(optional.isPresent()){
 

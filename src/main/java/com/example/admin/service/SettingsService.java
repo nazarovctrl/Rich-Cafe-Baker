@@ -105,8 +105,15 @@ public class SettingsService {
     }
 
     public boolean deleteAdminById(Message message) {
+        Optional<AdminEntity> optional = null;
+        try {
+            optional = adminRepostoriy.findById(Integer.valueOf(message.getText()));
 
-        Optional<AdminEntity> optional = adminRepostoriy.findById(Integer.valueOf(message.getText()));
+        }catch (RuntimeException e){
+            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                    "Admin Idsini to'g'ri kiriting "));
+            return false;
+        }
 
         if (optional.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),

@@ -24,13 +24,13 @@ public class AdminEntity {
     @Column(name = "full_name")
     private String fullname;
 
-    @Column
+    @Column(unique = true)
     private String phone;
 
     @Column
     private String password;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id",unique = true)
     private Long userId;
 
     @Enumerated(EnumType.STRING)

@@ -6,6 +6,7 @@ import com.example.enums.UserStatus;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.utill.Button;
+import com.example.utill.IdCheckUtil;
 import com.example.utill.SendMsg;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -106,7 +107,13 @@ public class SupplierService {
 
     public boolean deleteSupplierById(Message message) {
 
-        Optional<AdminEntity> optional = supplierRepostoriy.findById(Integer.valueOf(message.getText()));
+      if (!IdCheckUtil.check(message.getText())){
+            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+            "Id to'g'ri kiriting "));
+            return false;
+        }
+
+       Optional<AdminEntity> optional= supplierRepostoriy.findById(Integer.valueOf(message.getText()));
 
         if(optional.isEmpty()){
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
