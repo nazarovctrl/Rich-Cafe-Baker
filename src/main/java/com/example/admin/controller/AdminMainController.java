@@ -202,7 +202,7 @@ return;
                 }
 
                 menuEntity.setName(message.getText());
-                menuRepository.save(menuEntity);
+                menuRepostoriy.save(menuEntity);
                 menuService.saveMenu(message);
                 user.setStep(Step.MAIN);
                 menuEntity = new MenuEntity();
@@ -340,7 +340,7 @@ return;
                     adminEntity.setPhone(message.getText());
                     adminEntity.setUserId(null);
                     adminEntity.setRole(UserRole.ADMIN);
-                    adminRepository.save(adminEntity);
+                    adminRepostoriy.save(adminEntity);
                     adminEntity = new AdminEntity();
                     settingsService.settingsMenu(message);
                     user.setStep(Step.MAIN);
@@ -401,7 +401,7 @@ return;
             }
             case SUPPLIER_PHONE -> {
 
-                boolean checkPhoneDataBase = supplierService.chackPhoneDataBase(message);
+                boolean checkPhoneDataBase = supplierService.checkPhoneDataBase(message);
                 boolean checkPhone = supplierService.checkPhpone(message);
 
                 if(checkPhoneDataBase){
