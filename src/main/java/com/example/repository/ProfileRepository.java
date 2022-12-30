@@ -1,7 +1,6 @@
 package com.example.repository;
 
 import com.example.entity.ProfileEntity;
-import com.example.enums.ProfileRole;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
@@ -23,5 +22,4 @@ public interface ProfileRepository extends CrudRepository<ProfileEntity, Integer
 
     Optional<ProfileEntity> findByUserId(Long userId);
 
-    List<ProfileEntity> findByRole(ProfileRole role);
 }

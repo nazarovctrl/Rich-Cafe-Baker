@@ -66,4 +66,8 @@ public interface Constant {
     String empty = "\uD83D\uDFE2 bo'sh";
     String notDelivered = "\uD83D\uDEF5 ⌛️Buyurtmalar";
     String delivered = "\uD83D\uDC64\uD83D\uDCE6 Buyurtmalar";
+    String delivery = "\uD83D\uDCE6\uD83D\uDC40 Buyurtma olish";
+    String searchOrder = "\uD83D\uDD0E Qidirish";
+    String finished ="\uD83D\uDFE2 Yakunlangan" ;
+    String notFinished = "\uD83D\uDFE1 Yakunlanmagan";
 }

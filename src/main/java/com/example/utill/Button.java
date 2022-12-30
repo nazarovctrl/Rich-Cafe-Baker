@@ -2,6 +2,8 @@ package com.example.utill;
 
 import com.example.entity.MealEntity;
 import com.example.entity.MenuEntity;
+import com.example.entity.OrdersEntity;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
@@ -139,10 +141,10 @@ public class Button {
         return replyKeyboardMarkup;
     }
 
-    public static List<InlineKeyboardButton> delivery(Integer oderId, Integer messageId) {
+    public static List<InlineKeyboardButton> delivery(Integer oderId) {
         InlineKeyboardButton button = new InlineKeyboardButton();
         button.setText("✅ Qabul qilish");
-        button.setCallbackData("delivery/" + oderId + "/" + messageId);
+        button.setCallbackData("delivery/" + oderId);
 
 
         List<InlineKeyboardButton> row = new ArrayList<>();
@@ -150,21 +152,21 @@ public class Button {
         return row;
     }
 
-    public static List<InlineKeyboardButton> locationForSupplier(Integer orderId, Integer messageId) {
+    public static List<InlineKeyboardButton> locationForSupplier(Integer orderId) {
 
         InlineKeyboardButton location = new InlineKeyboardButton();
         location.setText("\uD83D\uDCCD Yetkazib berish manzili");
-        location.setCallbackData("locS/" + orderId + "/" + messageId);
+        location.setCallbackData("locS/" + orderId);
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(location);
         return row;
     }
 
-    public static List<InlineKeyboardButton> locationForAdmin(Integer orderId, Integer messageId) {
+    public static List<InlineKeyboardButton> locationForAdmin(Integer orderId) {
 
         InlineKeyboardButton location = new InlineKeyboardButton();
         location.setText("\uD83D\uDCCD Yetkazib berish manzili");
-        location.setCallbackData("locA/" + orderId + "/" + messageId);
+        location.setCallbackData("locA/" + orderId);
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(location);
 
@@ -177,9 +179,9 @@ public class Button {
         location.setText("\uD83D\uDCCD Yetkazib berish manzili");
 
         if (isSupplier) {
-            location.setCallbackData("location/" + orderId+"/s");
+            location.setCallbackData("location/" + orderId + "/s");
         } else {
-            location.setCallbackData("location/" + orderId+"/ ");
+            location.setCallbackData("location/" + orderId + "/ ");
         }
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(location);
@@ -187,19 +189,19 @@ public class Button {
         return row;
     }
 
-    public static InlineKeyboardButton save(Long userId, Integer orderId, Integer messageId) {
+    public static InlineKeyboardButton save(Long userId, Integer orderId) {
 
         InlineKeyboardButton save = new InlineKeyboardButton();
         save.setText("✅ Qabul qilish");
-        save.setCallbackData("save/" + userId + "/" + orderId + "/" + messageId);
+        save.setCallbackData("save/" + userId + "/" + orderId);
         return save;
     }
 
-    public static InlineKeyboardButton cancel(Long userId, Integer orderId, Integer messageId) {
+    public static InlineKeyboardButton cancel(Long userId, Integer orderId) {
 
         InlineKeyboardButton cancel = new InlineKeyboardButton();
         cancel.setText("❌ Bekor qilish");
-        cancel.setCallbackData("cancel/" + userId + "/" + orderId + "/" + messageId);
+        cancel.setCallbackData("cancel/" + userId + "/" + orderId);
         return cancel;
     }
 
@@ -217,5 +219,22 @@ public class Button {
         radEtish.setText("❌ Rad etish");
         radEtish.setCallbackData("cancelS/" + orderId);
         return radEtish;
+    }
+
+    public static InlineKeyboardMarkup deliveryMarkup(Integer orderId) {
+
+        List<InlineKeyboardButton> row = Button.delivery(orderId);
+
+        row.add(Button.cancelForSupplier(orderId));
+
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        keyboard.add(row);
+
+        List<InlineKeyboardButton> row2 = Button.locationForSupplier(orderId);
+        keyboard.add(row2);
+
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        markup.setKeyboard(keyboard);
+        return markup;
     }
 }

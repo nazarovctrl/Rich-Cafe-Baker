@@ -158,17 +158,24 @@ public class OrdersService {
         if (methodType.equals(MethodType.OLIB_KETISH)) {
             type = "Olib ketish";
         } else {
-            type = "\uD83D\uDEF5 Yetkazib berish";
+            type = "\uD83D\uDEF5 Yetkazib berish ";
+            if (ordersEntity.getSupplier() != null) {
+                type += "\nYetkazib beruvchi: " + ordersEntity.getSupplier().getFullname() +
+                        "\nTelefon raqam: " + ordersEntity.getSupplier().getPhone();
+            }
         }
         text.append("\nBuyurtma turi: ").append(type).append("*\n\n");
+
 
         List<OrderMealEntity> mealList = orderMealService.getListByOrderId(ordersEntity.getId());
         double total = 0;
         for (OrderMealEntity entity : mealList) {
-            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ").append(entity.getMeal().getPrice()).append(" = ").append(entity.getMeal().getPrice() * entity.getQuantity()).append(" so'm \n\n");
+            text.append(entity.getMeal().getName()).append("\n").append(entity.getQuantity()).append(" x ")
+                    .append(entity.getMeal().getPrice()).append(" = ")
+                    .append(entity.getMeal().getPrice() * entity.getQuantity()).append(" so'm \n");
             total += entity.getMeal().getPrice() * entity.getQuantity();
         }
-        text.append("\n Jami: ").append(total).append(" so'm");
+        text.append("\nJami: ").append(total).append(" so'm\n");
         return text.toString();
     }
 
@@ -211,11 +218,11 @@ public class OrdersService {
             List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
             markup.setKeyboard(keyboard);
 
-            LocationMessageDTO messageDTO = deliveryService.getLocationMessageDTO(update, orderId);
+            LocationMessageDTO messageDTO = deliveryService.getLocationMessageDTO(update.getCallbackQuery().getFrom().getId(), orderId);
             if (messageDTO != null) {
                 DeleteMessage deleteMessage = new DeleteMessage();
                 deleteMessage.setChatId(update.getCallbackQuery().getFrom().getId());
-                deleteMessage.setMessageId(messageDTO.getMessageId());
+                deleteMessage.setMessageId(messageDTO.getLocationMessageId());
                 deliveryService.deleteLocationMessageDTO(messageDTO);
                 myTelegramBot.send(deleteMessage);
             }
@@ -225,15 +232,9 @@ public class OrdersService {
             keyboard.add(row);
             editMessage(update, markup);
 
-            deliveryService.delivery(order, Integer.valueOf(split[3]));
+            deliveryService.delivery(order);
             return;
         }
-
-        DeleteMessage deleteMessage = new DeleteMessage();
-        deleteMessage.setChatId(userId);
-        deleteMessage.setMessageId(Integer.valueOf(split[3]));
-        myTelegramBot.send(deleteMessage);
-
 
         InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
@@ -269,13 +270,6 @@ public class OrdersService {
             return;
         }
 
-
-        DeleteMessage deleteMessage = new DeleteMessage();
-        deleteMessage.setChatId(userId);
-        deleteMessage.setMessageId(Integer.valueOf(split[3]));
-        myTelegramBot.send(deleteMessage);
-
-
         editMessage(update, null);
 
         ordersService.changeStatusById(orderId, OrdersStatus.CANCELLED);
@@ -294,7 +288,13 @@ public class OrdersService {
         sendMessage.setText(getOrderDetail(order) + " \n\n* ❌ Buyurtma bekor qilindi ❌*");
         myTelegramBot.send(sendMessage);
 
-        menuController.mainMenu(Long.valueOf(userId)); //userri menuga oktizadi
+        LocationMessageDTO messageDTO = deliveryService.getLocationMessageDTO(update.getCallbackQuery().getFrom().getId(), orderId);
+        if (messageDTO != null) {
+            DeleteMessage deleteMessage = new DeleteMessage();
+            deleteMessage.setChatId(messageDTO.getSupplierUserId());
+            deleteMessage.setMessageId(messageDTO.getLocationMessageId());
+            myTelegramBot.send(deleteMessage);
+        }
 
     }
 
@@ -314,11 +314,23 @@ public class OrdersService {
         sendMessage.setChatId(order.getProfile().getUserId());
         sendMessage.setText(getOrderDetail(order) + " \n\n *❇️Buyurtma yakunlandi!❇️*");
 
+        LocationMessageDTO messageDTO = deliveryService.getLocationMessageDTO(update.getCallbackQuery().getFrom().getId(), orderId);
+        if (messageDTO != null) {
+            DeleteMessage deleteMessage = new DeleteMessage();
+            deleteMessage.setChatId(messageDTO.getSupplierUserId());
+            deleteMessage.setMessageId(messageDTO.getLocationMessageId());
+            myTelegramBot.send(deleteMessage);
+        }
         myTelegramBot.send(sendMessage);
 
     }
 
     public List<OrdersEntity> getListBySupplierUserId(Long userId, OrdersStatus status) {
         return ordersRepository.findBySupplierUserId(userId, status);
+    }
+
+
+    public List<OrdersEntity> getListByStatusAndMethodType(OrdersStatus status, MethodType type) {
+        return ordersRepository.findByStatusAndMethodType(status, type);
     }
 }

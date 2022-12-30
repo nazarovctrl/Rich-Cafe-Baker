@@ -3,9 +3,11 @@ package com.example.myTelegramBot;
 
 import com.example.admin.controller.AdminAuthController;
 import com.example.admin.controller.AdminMainController;
+import com.example.admin.controller.CookerController;
 import com.example.admin.controller.SupplierController;
 import com.example.config.BotConfig;
 import com.example.controller.AuthController;
+import com.example.controller.CallBackQueryController;
 import com.example.controller.FormalizationController;
 import com.example.controller.MainController;
 
@@ -34,18 +36,22 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
     private final AdminMainController adminController;
     private final SupplierController supplierController;
+    private final CookerController cookerController;
     private final AdminAuthController adminAuthController;
+    private final CallBackQueryController callBackQueryController;
 
     private List<TelegramUsers> usersList = new ArrayList<>();
 
-    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController, SupplierController supplierController, AdminAuthController adminAuthController) {
+    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController, SupplierController supplierController, CookerController controller, AdminAuthController adminAuthController, CallBackQueryController callBackQueryController) {
         this.mainController = mainController;
         this.authController = authController;
         this.formalizationController = formalizationController;
         this.botConfig = botConfig;
         this.adminController = adminController;
         this.supplierController = supplierController;
+        this.cookerController = controller;
         this.adminAuthController = adminAuthController;
+        this.callBackQueryController = callBackQueryController;
     }
 
 
@@ -93,6 +99,8 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
                 } else if (role.equals(UserRole.SUPPLIER)) {
                     supplierController.handle(message);
+                }else if (role.equals(UserRole.COOKER)){
+                    cookerController.handle(message);
                 }
                 return;
             }
@@ -112,6 +120,10 @@ public class MyTelegramBot extends TelegramLongPollingBot {
             }
 
 
+        }
+
+        if (update.hasCallbackQuery()) {
+            callBackQueryController.handleCallbackQuery(update);
         }
 
 

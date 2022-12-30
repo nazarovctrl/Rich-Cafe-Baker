@@ -1,7 +1,10 @@
 package com.example.admin.controller;
 
+import com.example.admin.service.DeliveryService;
 import com.example.admin.service.SupplierService;
+import com.example.dto.LocationMessageDTO;
 import com.example.entity.OrdersEntity;
+import com.example.enums.MethodType;
 import com.example.enums.OrdersStatus;
 import com.example.enums.Step;
 import com.example.interfaces.Constant;
@@ -13,6 +16,7 @@ import com.example.utill.SendMsg;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -26,12 +30,14 @@ public class SupplierController {
     private final SupplierService supplierService;
     private final OrdersService ordersService;
     private final MyTelegramBot myTelegramBot;
+    private final DeliveryService deliveryService;
 
     @Lazy
-    public SupplierController(SupplierService supplierService, OrdersService ordersService, MyTelegramBot myTelegramBot) {
+    public SupplierController(SupplierService supplierService, OrdersService ordersService, MyTelegramBot myTelegramBot, DeliveryService deliveryService) {
         this.supplierService = supplierService;
         this.ordersService = ordersService;
         this.myTelegramBot = myTelegramBot;
+        this.deliveryService = deliveryService;
     }
 
     private final List<TelegramUsers> usersList = new ArrayList<>();
@@ -65,6 +71,10 @@ public class SupplierController {
                     confirmedOrderHistoryList(userId);
                     return;
                 }
+                case Constant.delivery -> {
+                    notGivenOrderList(userId);
+                    return;
+                }
                 case Constant.back -> {
                     if (user.getStep() == Step.HOLAT) {
                         user.setStep(null);
@@ -87,6 +97,37 @@ public class SupplierController {
 
     }
 
+    private void notGivenOrderList(Long userId) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(userId);
+        sendMessage.setParseMode("MARKDOWN");
+        List<OrdersEntity> orderList = ordersService.getListByStatusAndMethodType(OrdersStatus.CHECKING, MethodType.YETKAZIB_BERISH);
+
+
+        orderList.forEach(order ->
+                {
+                    sendMessage.setReplyMarkup(Button.deliveryMarkup(order.getId()));
+                    String text = ordersService.getOrderDetail(order);
+                    text += "\n*Mijoz:* _" + order.getProfile().getFullName() +
+                            "_\n*Telefon raqam*: _" + order.getProfile().getPhone() + "_";
+                    sendMessage.setText(text
+                    );
+                    LocationMessageDTO locationMessageDTO = deliveryService.getLocationMessageDTO(userId, order.getId());
+                    if (locationMessageDTO != null) {
+                        DeleteMessage deleteMessage = new DeleteMessage();
+                        deleteMessage.setChatId(userId);
+                        deleteMessage.setMessageId(locationMessageDTO.getLocationMessageId());
+                        deliveryService.deleteLocationMessageDTO(locationMessageDTO);
+                        myTelegramBot.send(deleteMessage);
+                        return;
+                    }
+
+                    myTelegramBot.send(sendMessage);
+                }
+        );
+
+    }
+
     private void confirmedOrderHistoryList(Long userId) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(userId);
@@ -106,6 +147,8 @@ public class SupplierController {
             sendMessage.setReplyMarkup(markup);
 
             String text = ordersService.getOrderDetail(order);
+            text += "\n*Mijoz:* _" + order.getProfile().getFullName() +
+                    "_\n*Telefon raqam*: _" + order.getProfile().getPhone() + "_";
             sendMessage.setText(text);
 
             myTelegramBot.send(sendMessage);
@@ -122,6 +165,8 @@ public class SupplierController {
         List<OrdersEntity> oderList = ordersService.getListBySupplierUserId(userId, OrdersStatus.FINISHED);
         oderList.forEach(order -> {
             String text = ordersService.getOrderDetail(order);
+            text += "\n*Mijoz:* _" + order.getProfile().getFullName() +
+                    "_\n*Telefon raqam*: _" + order.getProfile().getPhone() + "_";
             sendMessage.setText(text);
             myTelegramBot.send(sendMessage);
         });
@@ -178,6 +223,9 @@ public class SupplierController {
                                         ),
                                         Button.row(
                                                 Button.button(Constant.notDelivered)
+                                        ),
+                                        Button.row(
+                                                Button.button(Constant.delivery)
                                         )
                                 )
                         )

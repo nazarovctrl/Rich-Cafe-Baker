@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import com.example.entity.ProfileEntity;
-import com.example.enums.ProfileRole;
 import com.example.enums.Step;
 import com.example.enums.UserStatus;
 import com.example.myTelegramBot.MyTelegramBot;
@@ -83,7 +82,7 @@ public class AuthController {
                 profileEntity.setPhone(message.getText());
                 profileEntity.setUserId(message.getChatId());
                 profileEntity.setStatus(UserStatus.ACTIVE);
-                profileEntity.setRole(ProfileRole.USER);
+
 
                 authService.createProfile(profileEntity);
                 myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -110,7 +109,6 @@ public class AuthController {
                 profileEntity.setPhone(message.getContact().getPhoneNumber());
                 profileEntity.setUserId(message.getChatId());
                 profileEntity.setStatus(UserStatus.ACTIVE);
-                profileEntity.setRole(ProfileRole.USER);
 
                 authService.createProfile(profileEntity);
 

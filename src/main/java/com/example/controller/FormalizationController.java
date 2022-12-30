@@ -1,5 +1,6 @@
 package com.example.controller;
 
+import com.example.admin.service.CookerService;
 import com.example.admin.service.SettingsService;
 import com.example.entity.AdminEntity;
 import com.example.entity.OrderMealEntity;
@@ -40,7 +41,7 @@ public class FormalizationController {
 
     private final AuthService authService;
 
-    private final SettingsService settingsService;
+    private final CookerService cookerService;
     private final MenuController menuController;
 
     private final OrdersService ordersService;
@@ -52,10 +53,10 @@ public class FormalizationController {
     private List<TelegramUsers> usersList = new ArrayList<>();
 
     @Lazy
-    public FormalizationController(MyTelegramBot myTelegramBot, AuthService authService, SettingsService settingsService, MenuController menuController, OrdersService ordersService, OrderMealService orderMealService, MainController mainController, OrdersController ordersController) {
+    public FormalizationController(MyTelegramBot myTelegramBot, AuthService authService, CookerService cookerService, MenuController menuController, OrdersService ordersService, OrderMealService orderMealService, MainController mainController, OrdersController ordersController) {
         this.myTelegramBot = myTelegramBot;
         this.authService = authService;
-        this.settingsService = settingsService;
+        this.cookerService = cookerService;
         this.menuController = menuController;
         this.ordersService = ordersService;
         this.orderMealService = orderMealService;
@@ -192,8 +193,6 @@ public class FormalizationController {
                         saveUser1.setStep(null);
 
                         menuController.orderMenu(message);
-
-                        return;
                     }
                 }
 
@@ -214,11 +213,10 @@ public class FormalizationController {
         sendMessage1.setText("⌛️");
         sendMessage1.setChatId(message.getChatId());
         sendMessage1.setReplyMarkup(replyKeyboardRemove);
-        Message send = myTelegramBot.send(sendMessage1);
+        myTelegramBot.send(sendMessage1);
 
 
-        List<AdminEntity> adminList = settingsService.getAdminList();
-
+        List<AdminEntity> adminList = cookerService.getCookerList();
         SendMessage sendMessage = new SendMessage();
 
         sendMessage.setParseMode("MARKDOWN");
@@ -229,7 +227,7 @@ public class FormalizationController {
 
         ProfileEntity mijoz = authService.findByUserId(message.getChatId());
 
-        StringBuilder text = new StringBuilder("\uD83D\uDCE5 *Buyurtma :* \n\n");
+        StringBuilder text = new StringBuilder("        \uD83D\uDCE5 *Buyurtma :* \n\n");
 
         text.append("*Buyurtma raqami: ").append(orders.getId()).append("* \n");
 
@@ -239,36 +237,36 @@ public class FormalizationController {
 
             total += entity.getMeal().getPrice() * entity.getQuantity();
         }
-        text.append("\n *Jami: ").append(total).append(" so'm*");
-        text.append("\n *Buyurtma turi:* ");
+        text.append("\n*Jami: ").append(total).append(" so'm*");
+        text.append("\n*Buyurtma turi:* ");
 
         if (orders.getMethodType().equals(MethodType.OLIB_KETISH)) {
             text.append("_Olib ketish_");
         } else {
-            text.append("\uD83D\uDEF5 _Yetkazib berish_");
+            text.append("\uD83D\uDEF5_Yetkazib berish_");
         }
 
-        text.append("\n *To'lov turi:* ");
+        text.append("\n*To'lov turi:* ");
 
         if (orders.getPayment() == Payment.CASH) {
             text.append("\uD83D\uDCB5 _Naqd_");
         }
-        text.append("\n Mijoz: ").append(mijoz.getFullName());
-        text.append("\n Telefon raqam : ").append(mijoz.getPhone());
+        text.append("\n*Mijoz:* _").append(mijoz.getFullName());
+        text.append("\n_*Telefon raqam:* _").append(mijoz.getPhone()).append("_");
 
         sendMessage.setText(text.toString());
 
 
         List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(Button.save(mijoz.getUserId(), orders.getId(), send.getMessageId()));
-        row.add(Button.cancel(mijoz.getUserId(), orders.getId(), send.getMessageId()));
+        row.add(Button.save(mijoz.getUserId(), orders.getId()));
+        row.add(Button.cancel(mijoz.getUserId(), orders.getId()));
 
 
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(row);
 
         if (orders.getMethodType().equals(MethodType.YETKAZIB_BERISH)) {
-            List<InlineKeyboardButton> row2 = Button.locationForAdmin(orders.getId(),send.getMessageId());
+            List<InlineKeyboardButton> row2 = Button.locationForAdmin(orders.getId());
             keyboard.add(row2);
         }
 
@@ -282,6 +280,8 @@ public class FormalizationController {
             sendMessage.setChatId(admin.getUserId());
             myTelegramBot.send(sendMessage);
         }
+
+        menuController.mainMenu(message);
 
 
     }

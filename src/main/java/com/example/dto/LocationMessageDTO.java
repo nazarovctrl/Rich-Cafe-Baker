@@ -11,6 +11,5 @@ public class LocationMessageDTO {
 
     private Integer orderId;
 
-    private Integer messageId;
-
+    private Integer locationMessageId;
 }

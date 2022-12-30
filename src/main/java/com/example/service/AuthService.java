@@ -1,11 +1,9 @@
 package com.example.service;
 
 import com.example.entity.ProfileEntity;
-import com.example.enums.ProfileRole;
 import com.example.repository.ProfileRepository;
 import org.springframework.stereotype.Service;
 
-import javax.management.relation.Role;
 import java.util.List;
 
 
@@ -34,7 +32,5 @@ public class AuthService {
         return repository.findByUserId(userId).get();
     }
 
-    public List<ProfileEntity> getAdminList() {
-        return repository.findByRole(ProfileRole.ADMIN);
-    }
+
 }
