@@ -1,12 +1,18 @@
 package com.example.controller;
 
+import com.example.admin.service.SettingsService;
+import com.example.entity.AdminEntity;
+import com.example.entity.ProfileEntity;
 import com.example.enums.Step;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
-import com.example.service.AddMenuService;
+import com.example.service.AuthService;
 import com.example.step.TelegramUsers;
+import com.example.utill.Button;
+import com.example.utill.SendMsg;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.util.ArrayList;
@@ -15,24 +21,23 @@ import java.util.List;
 @Controller
 public class MainController {
     private final MenuController menuController;
-
-
     private final MyTelegramBot myTelegramBot;
-
+    private final SettingsService settingsService;
     private final OrdersController ordersController;
-
-
+    private final AuthService authService;
 
     public Step step = Step.MAIN;
 
     List<TelegramUsers> usersList = new ArrayList<>();
 
     @Lazy
-    public MainController(MenuController menuController, MyTelegramBot myTelegramBot, OrdersController ordersController ) {
+    public MainController(MenuController menuController, MyTelegramBot myTelegramBot, SettingsService settingsService, OrdersController ordersController, AuthService authService) {
         this.menuController = menuController;
         this.myTelegramBot = myTelegramBot;
+        this.settingsService = settingsService;
         this.ordersController = ordersController;
 
+        this.authService = authService;
     }
 
 
@@ -46,6 +51,17 @@ public class MainController {
             if (text.equals("/start") || users.getStep() == null) {
                 menuController.mainMenu(message);
                 users.setStep(Step.MAIN);
+
+            }
+
+            if (users.getStep().equals(Step.COMMENT)) {
+                if (text.equals(Constant.back)) {
+                    users.setStep(Step.MAIN);
+                    menuController.mainMenu(message);
+                    return;
+                }
+
+                sendMessageToAdmin(text, message.getChatId());
 
             }
 
@@ -77,8 +93,11 @@ public class MainController {
                     }
 
                     case Constant.addComment -> {
-                        //fikr qoldirish
+                        comment(message);
+                        users.setStep(Step.COMMENT);
+                        return;
                     }
+
 
 //                    default -> {
 //                        SendMessage sendMessage = new SendMessage();
@@ -117,8 +136,42 @@ public class MainController {
             }
 
 
-
         }
+    }
+
+    private void sendMessageToAdmin(String text, Long chatId) {
+        SendMessage sendMessage = new SendMessage();
+        ProfileEntity user = authService.findByUserId(chatId);
+
+        sendMessage.setText("\uD83D\uDC64Mijoz: " + user.getFullName() +
+                "\n\n\uD83D\uDCDETelefon raqam: " + user.getPhone() +
+                "\n\n\uD83D\uDCDDFikr: \n" + text);
+
+
+        List<AdminEntity> adminList = settingsService.getAdminList();
+        adminList.forEach(admin -> {
+            sendMessage.setChatId(admin.getUserId());
+            myTelegramBot.send(sendMessage);
+        });
+        sendMessage.setText("✅Muvaffaqiyatli");
+        sendMessage.setChatId(chatId);
+        myTelegramBot.send(sendMessage);
+    }
+
+    private void comment(Message message) {
+        myTelegramBot.send(
+                SendMsg.sendMsg(
+                        message.getChatId(),
+                        "\uD83D\uDCCCHar bir fikringiz biz uchun muhim \n ✍️Fikringizni yozib qoldiring!",
+                        Button.markup(
+                                Button.rowList(
+                                        Button.row(
+                                                Button.button(Constant.back))
+
+                                )
+                        )
+                )
+        );
     }
 
     public TelegramUsers saveUser(Long chatId) {

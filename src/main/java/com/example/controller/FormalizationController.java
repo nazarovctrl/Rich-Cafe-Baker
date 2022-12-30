@@ -259,25 +259,16 @@ public class FormalizationController {
         sendMessage.setText(text.toString());
 
 
-        InlineKeyboardButton button = new InlineKeyboardButton();
-        button.setText("✅ Qabul qilish");
-        button.setCallbackData("save/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
-
-        InlineKeyboardButton button2 = new InlineKeyboardButton();
-        button2.setText("❌ Bekor qilish");
-        button2.setCallbackData("cancel/" + mijoz.getUserId() + "/" + orders.getId() + "/" + send.getMessageId());
-
-
         List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(button);
-        row.add(button2);
+        row.add(Button.save(mijoz.getUserId(), orders.getId(), send.getMessageId()));
+        row.add(Button.cancel(mijoz.getUserId(), orders.getId(), send.getMessageId()));
 
 
         List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
         keyboard.add(row);
 
         if (orders.getMethodType().equals(MethodType.YETKAZIB_BERISH)) {
-            List<InlineKeyboardButton> row2 = Button.location(orders.getId());
+            List<InlineKeyboardButton> row2 = Button.locationForAdmin(orders.getId(),send.getMessageId());
             keyboard.add(row2);
         }
 
@@ -364,7 +355,7 @@ public class FormalizationController {
             total += entity.getMeal().getPrice() * entity.getQuantity();
 
         }
-        savat += "\n *Jami: " + total+" so'm*";
+        savat += "\n *Jami: " + total + " so'm*";
         savat += "\n *Buyurtma turi:* ";
 
         if (orders.getMethodType().equals(MethodType.OLIB_KETISH)) {
@@ -476,7 +467,7 @@ public class FormalizationController {
             total += entity.getMeal().getPrice() * entity.getQuantity();
 
         }
-        savat += "\n Jami: " + total+" so'm";
+        savat += "\n Jami: " + total + " so'm";
         myTelegramBot.send(
                 SendMsg.sendMsg(
                         message.getChatId(),
