@@ -61,8 +61,17 @@ public interface OrdersRepository extends JpaRepository<OrdersEntity, Integer> {
     List<OrdersEntity> getOrdersHistoryListByUserId(Long userId, OrdersStatus status);
 
 
-    @Query("from OrdersEntity o where o.supplier.userId=?1 and o.status=?2 order by o.createdDate ")
+    @Query("from OrdersEntity o where o.supplier.userId=?1 and o.status=?2 and o.visible=true order by o.createdDate  ")
     List<OrdersEntity> findBySupplierUserId(Long userId, OrdersStatus status);
 
     List<OrdersEntity> findByStatusAndMethodType(OrdersStatus status, MethodType methodType);
+
+    @Query("from OrdersEntity o where o.id=?1 and o.status<>'NOT_CONFIRMED' and o.visible=true")
+    OrdersEntity findByIdAndStatusConfirmed(Integer id);
+
+    List<OrdersEntity> findByStatusAndVisible(OrdersStatus status, boolean visible);
+
+
+    @Query("from OrdersEntity o where o.id=?1 and o.supplier.userId=?2 and  (o.status ='CONFIRMED' or o.status='FINISHED') and o.visible=true")
+    OrdersEntity findByIdAndSupplierUserIdStatusConfirmed(Integer id, Long userId);
 }

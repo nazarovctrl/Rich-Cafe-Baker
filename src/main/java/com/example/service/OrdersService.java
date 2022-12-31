@@ -109,6 +109,7 @@ public class OrdersService {
         return optional.orElse(null);
     }
 
+
     public void changeStatusById(Integer orderId, OrdersStatus status) {
         ordersRepository.changeStatusById(orderId, status);
     }
@@ -303,12 +304,15 @@ public class OrdersService {
         String data = callbackQuery.getData();
         String[] split = data.split("/");
         Integer orderId = Integer.valueOf(split[1]);
-        changeStatusById(orderId, OrdersStatus.FINISHED);
 
         editMessage(update, null);
 
         OrdersEntity order = ordersService.findById(orderId);
-
+        if (!order.getStatus().equals(OrdersStatus.FINISHED)) {
+            order.setStatus(OrdersStatus.FINISHED);
+            order.setFinishedDate(LocalDateTime.now());
+            ordersService.update(order);
+        }
         SendMessage sendMessage = new SendMessage();
         sendMessage.setParseMode("MARKDOWN");
         sendMessage.setChatId(order.getProfile().getUserId());
@@ -332,5 +336,18 @@ public class OrdersService {
 
     public List<OrdersEntity> getListByStatusAndMethodType(OrdersStatus status, MethodType type) {
         return ordersRepository.findByStatusAndMethodType(status, type);
+    }
+
+    public OrdersEntity findByIdConfirmedOrder(int number) {
+        return ordersRepository.findByIdAndStatusConfirmed(number);
+    }
+
+    public List<OrdersEntity> getListByStatus(OrdersStatus status) {
+        return ordersRepository.findByStatusAndVisible(status, true);
+    }
+
+    public OrdersEntity findByIdAndSupplierUserIdConfirmedOrder(Integer orderId, Long supplierUserId) {
+        return ordersRepository.findByIdAndSupplierUserIdStatusConfirmed(orderId, supplierUserId);
+
     }
 }

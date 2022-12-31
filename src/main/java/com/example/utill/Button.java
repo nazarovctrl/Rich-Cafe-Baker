@@ -3,6 +3,7 @@ package com.example.utill;
 import com.example.entity.MealEntity;
 import com.example.entity.MenuEntity;
 import com.example.entity.OrdersEntity;
+import com.example.interfaces.Constant;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -192,7 +193,7 @@ public class Button {
     public static InlineKeyboardButton save(Long userId, Integer orderId) {
 
         InlineKeyboardButton save = new InlineKeyboardButton();
-        save.setText("✅ Qabul qilish");
+        save.setText(Constant.save);
         save.setCallbackData("save/" + userId + "/" + orderId);
         return save;
     }
