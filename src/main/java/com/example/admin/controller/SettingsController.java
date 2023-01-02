@@ -264,6 +264,8 @@ public class SettingsController {
                             supplierService.supplierListGotovo(message);
                             user.setStep(Step.MAIN);
                         }
+
+                        user.setStep(Step.MAIN);
                     }
                     case COOKER_NAME -> {
 
