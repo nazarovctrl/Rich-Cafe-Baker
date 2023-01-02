@@ -70,7 +70,6 @@ public interface Constant {
     String finished ="\uD83D\uDFE2 Yakunlangan" ;
     String notFinished = "\uD83D\uDFE1 Qabul qilingan";
     String save = "✅ Qabul qilish";
-    String notFinished = "\uD83D\uDFE1 Yakunlanmagan";
     String addCooker = "➕ Zabzal qushish";
     String deleteCooker = "\uD83D\uDDD1 Zabzal uchirish";
     String listCooker= "\uD83D\uDCD6 Zabzal ruyhati";
