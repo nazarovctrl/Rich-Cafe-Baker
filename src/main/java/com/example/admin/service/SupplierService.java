@@ -37,7 +37,7 @@ public class SupplierService {
     public void addSupplierPassword(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Qo'shmoqchi bo'lgan Dastavchik ga Parol kiriting ( 8 - xonali )  ⬇"));
+                "Qo'shmoqchi bo'lgan Dastavchik ga Parol kiriting. Parol eng kamida 6ta belgidan iborat bo'lsin ⬇"));
     }
 
     public void addSupplierPhone(Message message) {
@@ -65,7 +65,7 @@ public class SupplierService {
         if (message.getText().length() < 5) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "" +
                     "❌  Kechirasiz Dastavchik ga beriladigan Parol eng kamida 5 ta belgidan iborat  bo'lsin. " + "\n" +
-                    "✅  Qaytadan urining Masalan Parol (12345)." + "\n" +
+                    "✅  Qaytadan urining Masalan Parol (123456)." + "\n" +
                     "❌  Eslatma Parol boshqa Dastavchik Paroli bilan takrorlanmasin. "));
             return false;
         }

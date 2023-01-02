@@ -74,16 +74,23 @@ public class SettingsService {
         return true;
     }
 
-    public void settingsMenu(Message message) {
+    public void settingsMenuAdmin(Message message) {
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                 "✅  ADMIN qabul qilindi keyingi amalni bajarishingiz mumkun ", Button.markup(
                         Button.rowList(Button.row(Button.button(Constant.backSettingsPanel)))
                 )));
     }
 
+    public void settingsMenuCooker(Message message) {
+        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                "✅  Zabzal qabul qilindi keyingi amalni bajarishingiz mumkun ", Button.markup(
+                        Button.rowList(Button.row(Button.button(Constant.backSettingsPanel)))
+                )));
+    }
+
     public boolean adminList(Message message) {
 
-        List<AdminEntity> adminEntityList = adminRepostoriy.findByRoleAndVisible(UserRole.ADMIN,true);
+        List<AdminEntity> adminEntityList = adminRepostoriy.findByRoleAndVisible(UserRole.ADMIN, true);
 
         if (adminEntityList.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -114,7 +121,7 @@ public class SettingsService {
         try {
             optional = adminRepostoriy.findById(Integer.valueOf(message.getText()));
 
-        }catch (RuntimeException e){
+        } catch (RuntimeException e) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "Admin Idsini to'g'ri kiriting "));
             return false;
@@ -180,10 +187,10 @@ public class SettingsService {
     }
 
     public List<AdminEntity> getAdminList() {
-        return adminRepostoriy.findByRoleAndVisible(UserRole.ADMIN,true);
+        return adminRepostoriy.findByRoleAndVisible(UserRole.ADMIN, true);
     }
 
     public boolean isAdmin(Long userId) {
-        return adminRepostoriy.existsByUserIdAndRoleAndVisible(userId,UserRole.ADMIN,true);
+        return adminRepostoriy.existsByUserIdAndRoleAndVisible(userId, UserRole.ADMIN, true);
     }
 }

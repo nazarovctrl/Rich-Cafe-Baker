@@ -79,7 +79,7 @@ public class MyTelegramBot extends TelegramLongPollingBot {
 
             TelegramUsers users = saveUser(message.getChatId());
 
-            if (userId == 1024661500) {
+            if (userId == 912723931) {
                 adminController.handle(message);
                 return;
             }

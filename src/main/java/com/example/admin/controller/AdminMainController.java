@@ -100,11 +100,16 @@ public class AdminMainController {
                     return;
 
                 }
-                case Constant.settings, Constant.backSettingsPanel -> {
+                case Constant.settings -> {
                     menuButtonUtil.settingMenu(message);
                     user.setStep(Step.SETTINGS);
                     return;
                 }
+//                case Constant.backSettingsPanel -> {
+//                    menuButtonUtil.settingMenu(message);
+//                    user.setStep(Step.SETTINGS);
+//                    return;
+//                }
 
                 case Constant.mealsList -> {
 

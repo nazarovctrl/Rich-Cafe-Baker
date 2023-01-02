@@ -113,6 +113,7 @@ public class SettingsController {
                 }
                 case Constant.backSettingsPanel -> {
                     menuButtonUtil.settingMenu(message);
+                    user.setStep(null);
                     return;
 
                 }
@@ -134,9 +135,7 @@ public class SettingsController {
 
                 }
                 case Constant.listCooker -> {
-
                     menuController.cookerList(message);
-
                 }
             }
             if (user.getStep() != null) {
@@ -179,7 +178,7 @@ public class SettingsController {
                             adminEntity.setRole(UserRole.ADMIN);
                             adminRepository.save(adminEntity);
                             adminEntity = new AdminEntity();
-                            settingsService.settingsMenu(message);
+                            settingsService.settingsMenuAdmin(message);
                             user.setStep(Step.MAIN);
                         }
 
@@ -299,7 +298,7 @@ public class SettingsController {
                             adminEntity.setRole(UserRole.COOKER);
                             adminRepository.save(adminEntity);
                             adminEntity = new AdminEntity();
-                            settingsService.settingsMenu(message);
+                            settingsService.settingsMenuCooker(message);
                             user.setStep(Step.MAIN);
                             return;
                         }
