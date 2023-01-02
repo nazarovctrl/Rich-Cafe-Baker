@@ -55,7 +55,7 @@ public class SettingsService {
             if (!text.startsWith("+998") || (text.length() != 13)) {
                 myTelegramBot.send(SendMsg.sendMsgParse(message.getChatId(),
                         "❌  Telefon nomer xato kiritildi !" + "\n" +
-                                "✅ Iltimos telefon raqamni quyidagi shakilda jo'nating Masalan : (+998971234567)"));
+                                "✅ Iltimos telefon raqamni quyidagi shakilda jo'nating Masalan : (+998991234567)"));
                 return false;
             }
         }
@@ -153,7 +153,7 @@ public class SettingsService {
 
     }
 
-    public boolean checkpasswordDataBase(Message message) {
+    public boolean checkPasswordDataBase(Message message) {
 
         Optional<AdminEntity> optional = adminRepostoriy.findByPassword(message.getText());
 
@@ -173,7 +173,7 @@ public class SettingsService {
         if (optional.isPresent()) {
 
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                    "❌ Kechirasiz bunday telefon raqam bor qaytadan urining"));
+                    "❌ Kechirasiz bunday telefon raqam ruyhatdan utgan qaytadan urining"));
             return true;
         }
         return false;

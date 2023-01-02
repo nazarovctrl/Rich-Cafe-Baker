@@ -43,10 +43,11 @@ public class CookerController {
 
 
     public void handle(Message message) {
+
         if (message.hasText()) {
             String text = message.getText();
             TelegramUsers user = saveUser(message.getChatId());
-            if (text.equals("/start")) {
+            if (text.equals("/start") || text.equals("Asosiy Menyu !")) {
                 user.setStep(null);
                 menu(user.getChatId());
                 return;
@@ -60,9 +61,6 @@ public class CookerController {
                 case Constant.notFinished -> {
                     user.setStep(Step.NOT_FINISHED_ORDER);
                     methodType(user.getChatId());
-                }
-                case Constant.searchOrder -> {
-                    searchOrder(user.getChatId());
                     user.setStep(Step.SEARCH_ORDER);
                 }
                 case Constant.olibKetish -> {

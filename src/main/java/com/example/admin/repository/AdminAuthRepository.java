@@ -10,7 +10,6 @@ public interface AdminAuthRepository extends CrudRepository<AdminEntity,Integer>
 
     boolean existsByPhone(String phone);
 
-    Optional<AdminEntity> findByUserId(Long userId);
 
     boolean existsByUserId(Long userId);
     

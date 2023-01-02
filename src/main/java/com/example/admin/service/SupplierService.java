@@ -44,7 +44,7 @@ public class SupplierService {
     public void addSupplierPhone(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Qo'shmoqchi bo'lgan ADMIN telefon raqamini kiriting Masalan (+998951024055)  ⬇"));
+                "Qo'shmoqchi bo'lgan ADMIN telefon raqamini kiriting Masalan (+998991234567)  ⬇"));
     }
 
     public boolean checkPhpone(Message message) {
@@ -63,10 +63,10 @@ public class SupplierService {
     public boolean checkPassword(Message message) {
 
 
-        if (message.getText().length() < 8 || message.getText().length() > 8) {
+        if (message.getText().length() >= 5) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "" +
-                    "❌  Kechirasiz Dastavchik ga beriladigan Parol 8 xonali bo'lsin. " + "\n" +
-                    "✅  Qaytadan urining Masalan Parol (12013409)." + "\n" +
+                    "❌  Kechirasiz Dastavchik ga beriladigan Parol 5 xonali katta bo'lsin. " + "\n" +
+                    "✅  Qaytadan urining Masalan Parol (12345)." + "\n" +
                     "❌  Eslatma Parol boshqa Dastavchik Paroli bilan takrorlanmasin. "));
             return false;
         }

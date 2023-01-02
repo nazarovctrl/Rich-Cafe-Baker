@@ -12,10 +12,9 @@ import com.example.entity.AdminEntity;
 import com.example.entity.MealEntity;
 import com.example.entity.MenuEntity;
 import com.example.enums.Step;
-import com.example.enums.UserRole;
 import com.example.interfaces.Constant;
 import com.example.step.TelegramUsers;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import java.util.LinkedList;
@@ -26,35 +25,37 @@ import java.util.Optional;
 public class AdminMainController {
 
     private List<TelegramUsers> usersList = new LinkedList<>();
-    @Autowired
-    private MenuButtonUtil menuButtonUtil;
-    @Autowired
-    private MenuService menuService;
-    @Autowired
-    private AdminMenuRepository menuRepostoriy;
-    @Autowired
-    private AdminMealsService mealsService;
-    @Autowired
-    private AdminMealsRepository mealsRepository;
-    @Autowired
-    private SettingsService settingsService;
-    @Autowired
-    private AdminRepository adminRepostoriy;
-    @Autowired
-    private SupplierService supplierService;
-    @Autowired
-    private SupplierRepostoriy supplierRepostoriy;
+    private final MenuButtonUtil menuButtonUtil;
+    private final MenuService menuService;
+    private final AdminMenuRepository menuRepository;
+    private final AdminMealsService mealsService;
+    private final AdminMealsRepository mealsRepository;
+
+    private final SettingsController settingsController;
     private MealEntity mealEntity = new MealEntity();
     private MenuEntity menuEntity = new MenuEntity();
     private AdminEntity adminEntity = new AdminEntity();
 
+    @Lazy
+    public AdminMainController(MenuButtonUtil menuButtonUtil, MenuService menuService, AdminMenuRepository menuRepository, AdminMealsService mealsService, AdminMealsRepository mealsRepository, SettingsController settingsController) {
+        this.menuButtonUtil = menuButtonUtil;
+        this.menuService = menuService;
+        this.menuRepository = menuRepository;
+        this.mealsService = mealsService;
+        this.mealsRepository = mealsRepository;
+        this.settingsController = settingsController;
+    }
+
     public void handle(Message message) {
 
         TelegramUsers user = saveUser(message.getChatId());
+        TelegramUsers step= settingsController.saveUser(message.getChatId());
 
         if (message.hasText() && message.getText().equals("/start") || user.getStep() == null) {
             menuButtonUtil.mainMenu(message);
             user.setStep(Step.MAIN);
+
+            step.setStep(null);
         }
 
         if (message.hasText()) {
@@ -103,34 +104,10 @@ public class AdminMainController {
                 case Constant.settings -> {
 
                     menuButtonUtil.settingMenu(message);
-                    return;
-
-                }
-                case Constant.addAdmin -> {
-
-                    settingsService.addAdminFullName(message);
-                    user.setStep(Step.ADMIN_FULL_NAME);
-                    return;
-
-                }
-                case Constant.deleteAdmin -> {
-
-                    boolean result = settingsService.adminList(message);
-
-                    if (result) {
-                        settingsService.deleteAdmin(message);
-                        user.setStep(Step.DELETE_ADMIN);
-                    }
-                    return;
-
-                }
-                case Constant.listOfAdmin -> {
-
-                    settingsService.adminListMessage(message);
-                    user.setStep(Step.ADMIN_LIST);
-
+                    user.setStep(Step.SETTINGS);
                     return;
                 }
+
                 case Constant.mealsList -> {
 
                     boolean result = mealsService.menuList(message);
@@ -149,32 +126,9 @@ public class AdminMainController {
                     if (result) {
                         mealsService.menuListGotovo(message);
                     }
-return;
-                }
-                case Constant.addSupplier -> {
-
-                    supplierService.addSuplierFullName(message);
-                    user.setStep(Step.SUPPLIER_NAME);
                     return;
-
                 }
-                case Constant.deleteSupplier -> {
 
-                    boolean result = supplierService.supplierList(message);
-
-                    if (result) {
-                        supplierService.deleteSupplierMessage(message);
-                        user.setStep(Step.DELETE_SUPPLIER);
-                        return;
-                    }
-
-                }
-                case Constant.supplierList -> {
-
-                    supplierService.supplierListMessage(message);
-                    user.setStep(Step.SUPPLIER_LIST);
-
-                }
                 case Constant.backMenu -> {
                     menuButtonUtil.mainMenu(message);
                     user.setStep(Step.MAIN);
@@ -188,7 +142,13 @@ return;
 
                 }
 
+
             }
+        }
+
+        if (user.getStep().equals(Step.SETTINGS)){
+            settingsController.handle(message);
+            return;
         }
 
         switch (user.getStep()) {
@@ -202,7 +162,7 @@ return;
                 }
 
                 menuEntity.setName(message.getText());
-                menuRepostoriy.save(menuEntity);
+                menuRepository.save(menuEntity);
                 menuService.saveMenu(message);
                 user.setStep(Step.MAIN);
                 menuEntity = new MenuEntity();
@@ -262,7 +222,7 @@ return;
             }
             case MEALS_UPDATE_PRICE -> {
 
-                boolean result = mealsService.mealesListUpdate(message);
+                boolean result = mealsService.mealsListUpdate(message);
 
                 if(result){
                     mealsService.updateMeals(message);
@@ -304,68 +264,7 @@ return;
                 }
 
             }
-            case ADMIN_FULL_NAME -> {
 
-                adminEntity.setFullname(message.getText());
-                settingsService.addAdminPassword(message);
-                user.setStep(Step.ADMIN_PASSWORD);
-
-            }
-            case ADMIN_PASSWORD -> {
-
-                boolean checkpasswordDataBase = settingsService.checkpasswordDataBase(message);
-                boolean checkpassword = settingsService.checkpassword(message);
-
-                if(checkpasswordDataBase){
-                    return;
-                }
-
-                if (checkpassword) {
-                    adminEntity.setPassword(message.getText());
-                    settingsService.addAdminPhone(message);
-                    user.setStep(Step.ADMIN_PHONE);
-                }
-
-            }
-            case ADMIN_PHONE -> {
-
-                boolean phonecheckDataBase = settingsService.checkPhoneDataBase(message);
-                boolean phonecheck = settingsService.checkPhoneNumber(message);
-
-                if(phonecheckDataBase){
-                    return;
-                }
-
-                if (phonecheck) {
-                    adminEntity.setPhone(message.getText());
-                    adminEntity.setUserId(null);
-                    adminEntity.setRole(UserRole.ADMIN);
-                    adminRepostoriy.save(adminEntity);
-                    adminEntity = new AdminEntity();
-                    settingsService.settingsMenu(message);
-                    user.setStep(Step.MAIN);
-                }
-
-            }
-            case DELETE_ADMIN -> {
-
-                boolean result =  settingsService.deleteAdminById(message);
-
-                if(result){
-                    settingsService.deleteAdminGotovo(message);
-                    user.setStep(Step.MAIN);
-                }
-
-            }
-            case ADMIN_LIST -> {
-
-                boolean result = settingsService.adminList(message);
-
-                if(result){
-                    settingsService.adminListGotovo(message);
-                }
-
-            }
             case MEALS_LIST -> {
 
                 boolean result = mealsService.mealsListAdmin(message);
@@ -376,68 +275,7 @@ return;
                 }
 
             }
-            case SUPPLIER_NAME -> {
 
-                adminEntity.setFullname(message.getText());
-                supplierService.addSupplierPassword(message);
-                user.setStep(Step.SUPPLIER_PASSWORD);
-
-            }
-            case SUPPLIER_PASSWORD -> {
-
-                boolean checkPasswordDataBase = supplierService.checkPasswordDataBase(message);
-                boolean checkPassword = supplierService.checkPassword(message);
-
-                if(checkPasswordDataBase){
-                    return;
-                }
-
-                if(checkPassword) {
-                    supplierService.addSupplierPhone(message);
-                    adminEntity.setPassword(message.getText());
-                    user.setStep(Step.SUPPLIER_PHONE);
-                }
-
-            }
-            case SUPPLIER_PHONE -> {
-
-                boolean checkPhoneDataBase = supplierService.checkPhoneDataBase(message);
-                boolean checkPhone = supplierService.checkPhpone(message);
-
-                if(checkPhoneDataBase){
-                    return;
-                }
-
-                if(checkPhone){
-                    adminEntity.setPhone(message.getText());
-                    adminEntity.setUserId(null);
-                    adminEntity.setRole(UserRole.SUPPLIER);
-                    supplierRepostoriy.save(adminEntity);
-                    adminEntity = new AdminEntity();
-                    supplierService.settingsMenu(message);
-                    user.setStep(Step.MAIN);
-                }
-
-            }
-            case DELETE_SUPPLIER -> {
-
-                boolean delete = supplierService.deleteSupplierById(message);
-
-                if(delete){
-                    supplierService.deleteSupplierGotovo(message);
-                    user.setStep(Step.MAIN);
-                }
-
-            }
-            case SUPPLIER_LIST -> {
-
-                boolean result = supplierService.supplierList(message);
-
-                if(result){
-                    supplierService.supplierListGotovo(message);
-                    user.setStep(Step.MAIN);
-                }
-            }
 
         }
 

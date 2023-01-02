@@ -26,20 +26,20 @@ public interface Constant {
     String phone = "\uD83D\uDCDE Telefon raqamingizni o'zgartiring";
 
 
-    String addMenu = "Menyu qushish";
+    String addMenu = "➕ Menyu qushish";
 
-    String removeMeal = "Taom uchirish";
-    String removeMenu = "Menyuni uchirish";
-    String changeCost = "Narxini uzgartirish";
+    String removeMeal = "\uD83D\uDDD1 Taom uchirish";
+    String removeMenu = "\uD83D\uDDD1 Menyuni uchirish";
 
 
-    String deleteMenu = "Menu o'chirish";
-    String attachMealToMenu = "Taom qo'shish";
-    String editePrice = "Narxlarni o'zgartirish";
-    String addAdmin = "Admin qo'shish";
-    String deleteAdmin = "Admin o'chirish";
-    String listOfAdmin = "Adminlar ro'yxati";
-    String deleteMeal = "Taomlarni o'chirish";
+
+    String deleteMenu = "\uD83D\uDDD1 Menu o'chirish";
+    String attachMealToMenu = "➕ Taom qo'shish";
+    String editePrice = "♻️ Narxlarni o'zgartirish";
+    String addAdmin = "➕ Admin qo'shish";
+    String deleteAdmin = "\uD83D\uDDD1 Admin o'chirish";
+    String listOfAdmin = "\uD83D\uDCD6 Adminlar ro'yxati";
+    String deleteMeal = "\uD83D\uDDD1\uD83D\uDDD1 Taomlarni o'chirish";
     String backMenu = "backMenu \uD83D\uDD19";
 
     String tozalash = "\uD83D\uDD04 Tozalash";
@@ -70,4 +70,7 @@ public interface Constant {
     String searchOrder = "\uD83D\uDD0E Qidirish";
     String finished ="\uD83D\uDFE2 Yakunlangan" ;
     String notFinished = "\uD83D\uDFE1 Yakunlanmagan";
+    String addCooker = "➕ Zabzal qushish";
+    String deleteCooker = "\uD83D\uDDD1 Zabzal uchirish";
+    String listCooker= "\uD83D\uDCD6 Zabzal ruyhati";
 }

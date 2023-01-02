@@ -131,7 +131,7 @@ public class AdminMealsService {
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                 "Narxini o'zgartirmoqchi bo'lgan maxsulot qaysi Menuga tegishli ekanligini bilish uchun Menu ID raqamini kiriting ⬇"));
     }
-    public boolean mealesListUpdate(Message message){
+    public boolean mealsListUpdate(Message message){
 
         List<MealEntity> entityList =  mealsRepository.findByMenu_Id(Integer.valueOf(message.getText()));
 
@@ -158,6 +158,11 @@ public class AdminMealsService {
     }
     public Optional<MealEntity> updateMealsById(Message message) {
 
+   /* if (!IdCheckUtil.check(message.getText())){
+        myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
+                "Iltimos Idni to'g'ri kiriting"));
+        return null;
+    }*/
         Optional<MealEntity> optional = mealsRepository.findById(Integer.valueOf(message.getText()));
         if(optional.isEmpty()){
             return null;
@@ -178,7 +183,7 @@ public class AdminMealsService {
     public void nullMealsEntity(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsgParse(message.getChatId(),
-                "❌  Kechirasiz bunaqa ID mavjud emas qayatdab urining ! "));
+                "❌  Kechirasiz bunaqa ID mavjud emas qaytadan urining ! "));
 
     }
     public void MealsByIdList(Message message,MealEntity meals) {

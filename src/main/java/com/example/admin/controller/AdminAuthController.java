@@ -85,12 +85,12 @@ public class AdminAuthController {
 
             adminEntity.setUserId(message.getChatId());
             authService.saveUserId(adminEntity);
+            stepMain.setStep(Step.START);
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "Muvaffaqiyatli ruyhatdan o'tdingiz",
                     Button.markup(Button.rowList(
-                            Button.row(Button.button("Asosiy Menyu"))
+                            Button.row(Button.button("Asosiy Menyu !"))
                     ))));
-            stepMain.setStep(null);
             adminEntity = new AdminEntity();
         }
     }
@@ -125,14 +125,9 @@ public class AdminAuthController {
         return false;
     }
 
-    public boolean isExists(Long userId){
-    return authService.isExistsByUserId(userId);
-    }
 
-    public UserRole getByUserId(Long userId){
 
-    return authService.getByUserId(userId);
-    }
+
         public TelegramUsers saveUser (Long chatId){
 
             for (TelegramUsers users : usersList) {

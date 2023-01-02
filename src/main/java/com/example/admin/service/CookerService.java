@@ -22,4 +22,8 @@ public class CookerService {
     public List<AdminEntity> getCookerList() {
         return adminRepository.findByRole(UserRole.COOKER);
     }
+
+    public boolean isCooker(Long userId) {
+        return adminRepository.existsByUserIdAndRole(userId,UserRole.COOKER);
+    }
 }

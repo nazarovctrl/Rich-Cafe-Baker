@@ -5,6 +5,9 @@ import com.example.admin.controller.AdminAuthController;
 import com.example.admin.controller.AdminMainController;
 import com.example.admin.controller.CookerController;
 import com.example.admin.controller.SupplierController;
+import com.example.admin.service.CookerService;
+import com.example.admin.service.SettingsService;
+import com.example.admin.service.SupplierService;
 import com.example.config.BotConfig;
 import com.example.controller.AuthController;
 import com.example.controller.CallBackQueryController;
@@ -12,7 +15,6 @@ import com.example.controller.FormalizationController;
 import com.example.controller.MainController;
 
 import com.example.enums.Step;
-import com.example.enums.UserRole;
 import com.example.step.TelegramUsers;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -40,9 +42,15 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private final AdminAuthController adminAuthController;
     private final CallBackQueryController callBackQueryController;
 
+    private final CookerService cookerService;
+
+    private final SupplierService supplierService;
+
+    private final SettingsService settingsService;
+
     private List<TelegramUsers> usersList = new ArrayList<>();
 
-    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController, SupplierController supplierController, CookerController controller, AdminAuthController adminAuthController, CallBackQueryController callBackQueryController) {
+    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController, SupplierController supplierController, CookerController controller, AdminAuthController adminAuthController, CallBackQueryController callBackQueryController, CookerService cookerService, SupplierService supplierService, SettingsService settingsService) {
         this.mainController = mainController;
         this.authController = authController;
         this.formalizationController = formalizationController;
@@ -52,6 +60,9 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         this.cookerController = controller;
         this.adminAuthController = adminAuthController;
         this.callBackQueryController = callBackQueryController;
+        this.cookerService = cookerService;
+        this.supplierService = supplierService;
+        this.settingsService = settingsService;
     }
 
 
@@ -92,18 +103,22 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 authController.handle(message);
             }
 
-            if (adminAuthController.isExists(message.getChatId())) {
-                UserRole role = adminAuthController.getByUserId(message.getChatId());
-                if (role.equals(UserRole.ADMIN)) {
-                    adminController.handle(message);
-
-                } else if (role.equals(UserRole.SUPPLIER)) {
-                    supplierController.handle(message);
-                }else if (role.equals(UserRole.COOKER)){
-                    cookerController.handle(message);
-                }
+            if (settingsService.isAdmin(userId)) {
+                adminController.handle(message);
                 return;
             }
+
+            if (supplierService.isSupplier(userId)) {
+                supplierController.handle(message);
+                return;
+            }
+
+            if (cookerService.isCooker(userId)) {
+                cookerController.handle(message);
+                return;
+            }
+
+
 
             if (message.hasText()) {
 

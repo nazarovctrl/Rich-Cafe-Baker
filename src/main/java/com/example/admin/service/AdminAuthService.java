@@ -32,7 +32,5 @@ return authRepository.existsByPhone(text);
     }
 
 
-    public UserRole getByUserId(Long userId) {
-        return authRepository.findByUserId(userId).get().getRole();
-    }
+
 }
