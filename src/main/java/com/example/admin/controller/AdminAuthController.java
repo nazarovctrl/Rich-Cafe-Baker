@@ -3,15 +3,18 @@ package com.example.admin.controller;
 import com.example.admin.service.AdminAuthService;
 import com.example.entity.AdminEntity;
 import com.example.enums.Step;
-import com.example.enums.UserRole;
 import com.example.myTelegramBot.MyTelegramBot;
+import com.example.step.Admin;
 import com.example.step.TelegramUsers;
 import com.example.utill.Button;
-import com.example.utill.InlineButton;
 import com.example.utill.SendMsg;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +25,7 @@ public class AdminAuthController {
     private final MyTelegramBot myTelegramBot;
 
     private final AdminAuthService authService;
-
-    private List<TelegramUsers> usersList = new ArrayList<>();
-
-    private AdminEntity adminEntity = new AdminEntity();
+    private List<Admin> usersList = new ArrayList<>();
 
     @Lazy
     public AdminAuthController(MyTelegramBot myTelegramBot, AdminAuthService authService) {
@@ -35,7 +35,7 @@ public class AdminAuthController {
 
     public void handle(Message message) {
 
-        TelegramUsers users = saveUser(message.getChatId());
+        Admin users = saveUser(message.getChatId());
         TelegramUsers stepMain = myTelegramBot.saveUser(message.getChatId());
 
         if (message.hasText()) {
@@ -60,23 +60,31 @@ public class AdminAuthController {
                     return;
                 }
 
-                if (!checkPhoneExists(message.getText())) {
+                if (checkPhoneExists(message.getText())) {
                     myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                             "Bu raqam ruyhatdan o'tkazilmagan \n" +
                                     "Iltimos qaytadan kiriting "));
                     return;
+
                 }
 
-                adminEntity = authService.findByPhone(message.getText());
+                ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
+                keyboardRemove.setRemoveKeyboard(true);
 
-                myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                        "Sizga berilgan parolni kiriting: "));
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.setText("Sizga berilgan parolni kiriting");
+                sendMessage.setChatId(message.getChatId());
+                sendMessage.setReplyMarkup(keyboardRemove);
+                myTelegramBot.send(sendMessage);
 
                 users.setStep(Step.ADMIN_PASSWORD);
+                users.setPhone(message.getText());
                 return;
             }
 
-            if (users.getStep().equals(Step.ADMIN_PASSWORD) && adminEntity != null) {
+            if (users.getStep().equals(Step.ADMIN_PASSWORD)) {
+
+                AdminEntity adminEntity = authService.findByPhone(users.getPhone());
 
                 if (!adminEntity.getPassword().equals(message.getText())) {
                     myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -92,53 +100,56 @@ public class AdminAuthController {
                         Button.markup(Button.rowList(
                                 Button.row(Button.button("Asosiy Menyu !"))
                         ))));
-                adminEntity = new AdminEntity();
-            users.setStep(null);
+                users.setStep(null);
             }
 
         }
         if (message.hasContact() && users.getStep().equals(Step.PHONE)) {
 
             String phone = message.getContact().getPhoneNumber();
-            if (!checkPhoneExists(phone)) {
+            if (checkPhoneExists(phone)) {
                 myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                         "Bu raqam ruyhatdan o'tkazilmagan \n" +
                                 "Iltimos qaytadan kiriting "));
                 return;
             }
 
-            adminEntity = authService.findByPhone(phone);
+            ReplyKeyboardRemove keyboardRemove = new ReplyKeyboardRemove();
+            keyboardRemove.setRemoveKeyboard(true);
 
-            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                    "Sizga berilgan parolni kiriting: "));
+            SendMessage sendMessage = new SendMessage();
+//          sendMessage.setText("Sizga berilgan parolni kiriting");
+
+            sendMessage.setChatId(message.getChatId());
+            sendMessage.setReplyMarkup(keyboardRemove);
+            myTelegramBot.send(sendMessage);
 
             users.setStep(Step.ADMIN_PASSWORD);
+            users.setPhone(phone);
+
 
         }
     }
 
     public boolean checkPhoneExists(String text) {
-        return authService.isExists(text);
+        return !authService.isExists(text);
     }
 
     public boolean checkPhone(String text) {
-        if (text.startsWith("+998") && text.length() == 13 || text.startsWith("998") && text.length() == 12) {
-            return true;
-        }
-        return false;
+        return text.startsWith("+998") && text.length() == 13 || text.startsWith("998") && text.length() == 12;
     }
 
 
-    public TelegramUsers saveUser(Long chatId) {
+    public Admin saveUser(Long chatId) {
 
-        for (TelegramUsers users : usersList) {
+        for (Admin users : usersList) {
             if (users.getChatId().equals(chatId)) {
                 return users;
             }
         }
 
 
-        TelegramUsers users = new TelegramUsers();
+        Admin users = new Admin();
         users.setChatId(chatId);
         usersList.add(users);
 
