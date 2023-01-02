@@ -30,7 +30,7 @@ public class AdminEntity {
     @Column
     private String password;
 
-    @Column(name = "user_id",unique = true)
+    @Column(name = "user_id", unique = true)
     private Long userId;
 
     @Enumerated(EnumType.STRING)
@@ -38,7 +38,10 @@ public class AdminEntity {
     private UserRole role;
 
     @Column
-    private Boolean busy=false;
+    private Boolean busy = false;
+
+    @Column
+    private Boolean visible = true;
 
 
 }

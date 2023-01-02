@@ -1,7 +1,6 @@
 package com.example.admin.controller;
 
 import com.example.admin.repository.AdminRepository;
-import com.example.admin.repository.SupplierRepostoriy;
 import com.example.admin.service.SettingsService;
 import com.example.admin.service.SupplierService;
 import com.example.admin.util.MenuButtonUtil;
@@ -11,7 +10,6 @@ import com.example.enums.UserRole;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.step.TelegramUsers;
-import com.example.utill.SendMsg;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -34,24 +32,22 @@ public class SettingsController {
 
     private final CookerMenuController menuController;
 
-    private final SupplierRepostoriy supplierRepostoriy;
     private final AdminMainController adminMainController;
 
     private AdminEntity adminEntity = new AdminEntity();
 
 
-    public SettingsController(MenuButtonUtil menuButtonUtil, SupplierService supplierService, SettingsService settingsService, AdminRepository adminRepository, MyTelegramBot myTelegramBot, CookerMenuController menuController, SupplierRepostoriy supplierRepostoriy, AdminMainController adminMainController) {
+    public SettingsController(MenuButtonUtil menuButtonUtil, SupplierService supplierService, SettingsService settingsService, AdminRepository adminRepository, MyTelegramBot myTelegramBot, CookerMenuController menuController, AdminMainController adminMainController) {
         this.menuButtonUtil = menuButtonUtil;
         this.supplierService = supplierService;
         this.settingsService = settingsService;
         this.adminRepository = adminRepository;
         this.myTelegramBot = myTelegramBot;
         this.menuController = menuController;
-        this.supplierRepostoriy = supplierRepostoriy;
         this.adminMainController = adminMainController;
     }
 
-    public void handle (Message message){
+    public void handle(Message message) {
 
         TelegramUsers user = saveUser(message.getChatId());
         TelegramUsers step = adminMainController.saveUser(message.getChatId());
@@ -244,7 +240,7 @@ public class SettingsController {
                             adminEntity.setPhone(message.getText());
                             adminEntity.setUserId(null);
                             adminEntity.setRole(UserRole.SUPPLIER);
-                            supplierRepostoriy.save(adminEntity);
+                            adminRepository.save(adminEntity);
                             adminEntity = new AdminEntity();
                             supplierService.settingsMenu(message);
                             user.setStep(Step.MAIN);
@@ -305,6 +301,7 @@ public class SettingsController {
                             adminEntity = new AdminEntity();
                             settingsService.settingsMenu(message);
                             user.setStep(Step.MAIN);
+                            return;
                         }
                     }
                     case DELETE_COOKER -> {
@@ -312,7 +309,7 @@ public class SettingsController {
                         boolean delete = menuController.deleteCookerById(message);
 
                         if (delete) {
-                            menuController. deletedCooker(message);
+                            menuController.deletedCooker(message);
                             user.setStep(Step.MAIN);
                         }
 

@@ -29,23 +29,23 @@ public class CookerMenuController {
     public void nameCooker(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Qushmoqchi bo'lgan Zapzalni ismi va familiyasini kiriting "));
+                "Qo'shmoqchi bo'lgan Zabzalni ismi va familiyasini kiriting "));
     }
 
     public void addPasswordCooker(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Qo'shmoqchi bo'lgan Zabzal ga Parol kiriting parol 5ta belgidan katta bo'lsin  ⬇"));
+                "Qo'shmoqchi bo'lgan Zabzal ga Parol kiriting Parol eng kamida 6 ta belgidan iborat bo'lsin  ⬇"));
     }
 
     public boolean checkPassword(Message message) {
 
 
         if (message.getText().length() <= 5) {
-            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "" +
-                    "❌  Kechirasiz Zabzal ga beriladigan Parol 5 xonali katta bo'lsin. " + "\n" +
-                    "✅  Qaytadan urining Masalan Parol (12345)." + "\n" +
-                    "❌  Eslatma Parol boshqa Zabzal Paroli bilan takrorlanmasin. "));
+            myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), """
+                    ❌  Kechirasiz Zabzal ga beriladigan Parol eng kamida 6 ta belgidan iborat bo'lsin.\s
+                    ✅  Qaytadan urining Masalan Parol (12345).
+                    ❌  Eslatma Parol boshqa Zabzal Paroli bilan takrorlanmasin.\s"""));
             return false;
         }
         return true;
@@ -57,12 +57,12 @@ public class CookerMenuController {
                 "Qo'shmoqchi bo'lgan Zabzal telefon raqamini kiriting Masalan (+998991234567)  ⬇"));
     }
 
-    public boolean checkPhone(Message message){
+    public boolean checkPhone(Message message) {
         String text = message.getText();
-        if (!text.startsWith("+998") || text.length() != 13){
+        if (!text.startsWith("+998") || text.length() != 13) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "❌  Telefon nomer xato kiritildi ! \n" +
-                           " ✅ Iltimos telefon raqamni quyidagi shakilda jo'nating Masalan : (+998991234567)"));
+                            " ✅ Iltimos telefon raqamni quyidagi shaklda jo'nating Masalan : (+998991234567)"));
             return false;
         }
         return true;
@@ -70,13 +70,13 @@ public class CookerMenuController {
 
     public boolean deleteCookerById(Message message) {
 
-        if (!IdCheckUtil.check(message.getText())){
+        if (!IdCheckUtil.check(message.getText())) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                    "Id to'g'ri kiriting "));
+                    "Id ni to'g'ri kiriting "));
             return false;
         }
 
-        Optional<AdminEntity> optional= adminRepository.findById(Integer.valueOf(message.getText()));
+        Optional<AdminEntity> optional = adminRepository.findById(Integer.valueOf(message.getText()));
 
         if (optional.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -90,7 +90,7 @@ public class CookerMenuController {
 
     public boolean cookerList(Message message) {
 
-        List<AdminEntity> adminEntityList = adminRepository.findByRole(UserRole.COOKER);
+        List<AdminEntity> adminEntityList = adminRepository.findByRoleAndVisible(UserRole.COOKER, true);
 
         if (adminEntityList.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),

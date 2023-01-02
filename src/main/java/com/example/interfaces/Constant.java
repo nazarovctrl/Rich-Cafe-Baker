@@ -26,10 +26,10 @@ public interface Constant {
     String phone = "\uD83D\uDCDE Telefon raqamingizni o'zgartiring";
 
 
-    String addMenu = "➕ Menyu qushish";
+    String addMenu = "➕ Menyu qo'shish";
 
-    String removeMeal = "\uD83D\uDDD1 Taom uchirish";
-    String removeMenu = "\uD83D\uDDD1 Menyuni uchirish";
+    String removeMeal = "\uD83D\uDDD1 Taom o'chirish";
+    String removeMenu = "\uD83D\uDDD1 Menyuni o'chirish";
 
 
 
@@ -70,7 +70,7 @@ public interface Constant {
     String finished ="\uD83D\uDFE2 Yakunlangan" ;
     String notFinished = "\uD83D\uDFE1 Qabul qilingan";
     String save = "✅ Qabul qilish";
-    String addCooker = "➕ Zabzal qushish";
-    String deleteCooker = "\uD83D\uDDD1 Zabzal uchirish";
-    String listCooker= "\uD83D\uDCD6 Zabzal ruyhati";
+    String addCooker = "➕ Zabzal qo'shish";
+    String deleteCooker = "\uD83D\uDDD1 Zabzal o'chirish";
+    String listCooker= "\uD83D\uDCD6 Zabzal ro'yhati";
 }

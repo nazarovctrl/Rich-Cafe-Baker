@@ -1,12 +1,9 @@
 package com.example.admin.controller;
-import com.example.admin.repository.AdminRepository;
+
 import com.example.admin.repository.AdminMealsRepository;
 import com.example.admin.repository.AdminMenuRepository;
-import com.example.admin.repository.SupplierRepostoriy;
 import com.example.admin.service.AdminMealsService;
 import com.example.admin.service.MenuService;
-import com.example.admin.service.SettingsService;
-import com.example.admin.service.SupplierService;
 import com.example.admin.util.MenuButtonUtil;
 import com.example.entity.AdminEntity;
 import com.example.entity.MealEntity;
@@ -17,6 +14,7 @@ import com.example.step.TelegramUsers;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 import org.telegram.telegrambots.meta.api.objects.Message;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -49,13 +47,14 @@ public class AdminMainController {
     public void handle(Message message) {
 
         TelegramUsers user = saveUser(message.getChatId());
-        TelegramUsers step= settingsController.saveUser(message.getChatId());
+        TelegramUsers step = settingsController.saveUser(message.getChatId());
 
         if (message.hasText() && message.getText().equals("/start") || user.getStep() == null) {
             menuButtonUtil.mainMenu(message);
             user.setStep(Step.MAIN);
-
             step.setStep(null);
+            return;
+
         }
 
         if (message.hasText()) {
@@ -101,8 +100,7 @@ public class AdminMainController {
                     return;
 
                 }
-                case Constant.settings -> {
-
+                case Constant.settings, Constant.backSettingsPanel -> {
                     menuButtonUtil.settingMenu(message);
                     user.setStep(Step.SETTINGS);
                     return;
@@ -135,18 +133,12 @@ public class AdminMainController {
                     return;
 
                 }
-                case Constant.backSettingsPanel -> {
-                    menuButtonUtil.settingMenu(message);
-                    user.setStep(Step.MAIN);
-                    return;
-
-                }
 
 
             }
         }
 
-        if (user.getStep().equals(Step.SETTINGS)){
+        if (user.getStep().equals(Step.SETTINGS)) {
             settingsController.handle(message);
             return;
         }
@@ -157,7 +149,7 @@ public class AdminMainController {
 
                 boolean checkMenuNameDataBase = menuService.checkMenuName(message);
 
-                if(checkMenuNameDataBase){
+                if (checkMenuNameDataBase) {
                     return;
                 }
 
@@ -172,7 +164,7 @@ public class AdminMainController {
 
                 boolean checkMealsName = mealsService.checkMealsName(message);
 
-                if(checkMealsName) {
+                if (checkMealsName) {
                     mealEntity.setName(message.getText());
                     mealsService.mealsPrice(message);
                     user.setStep(Step.ADD_MEALS_PRICE);
@@ -204,7 +196,7 @@ public class AdminMainController {
 
                 boolean result = mealsService.mealesList(message);
 
-                if(result) {
+                if (result) {
                     mealsService.deleteMeal2(message);
                     user.setStep(Step.MEALS_DELETE_ID);
                 }
@@ -224,7 +216,7 @@ public class AdminMainController {
 
                 boolean result = mealsService.mealsListUpdate(message);
 
-                if(result){
+                if (result) {
                     mealsService.updateMeals(message);
                     user.setStep(Step.MEALS_UPDATE_BY_ID);
                 }
@@ -269,7 +261,7 @@ public class AdminMainController {
 
                 boolean result = mealsService.mealsListAdmin(message);
 
-                if(result){
+                if (result) {
                     mealsService.melasListGotovo(message);
                     user.setStep(Step.MAIN);
                 }
@@ -279,13 +271,14 @@ public class AdminMainController {
 
         }
 
-        if (message.hasPhoto() && user.getStep().equals(Step.ADD_MEALS_PHOTO)){
+        if (message.hasPhoto() && user.getStep().equals(Step.ADD_MEALS_PHOTO)) {
             mealEntity.setPhoto(message.getPhoto().get(0).getFileId());
             mealsService.menuList(message);
             mealsService.addMealsMenu(message);
             user.setStep(Step.MEALS_MENU_lIST);
         }
     }
+
     public TelegramUsers saveUser(Long chatId) {
 
         for (TelegramUsers users : usersList) {

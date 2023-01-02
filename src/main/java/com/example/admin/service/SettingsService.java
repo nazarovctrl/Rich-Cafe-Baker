@@ -83,7 +83,7 @@ public class SettingsService {
 
     public boolean adminList(Message message) {
 
-        List<AdminEntity> adminEntityList = adminRepostoriy.findByRole(UserRole.ADMIN);
+        List<AdminEntity> adminEntityList = adminRepostoriy.findByRoleAndVisible(UserRole.ADMIN,true);
 
         if (adminEntityList.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -180,10 +180,10 @@ public class SettingsService {
     }
 
     public List<AdminEntity> getAdminList() {
-        return adminRepostoriy.findByRole(UserRole.ADMIN);
+        return adminRepostoriy.findByRoleAndVisible(UserRole.ADMIN,true);
     }
 
     public boolean isAdmin(Long userId) {
-        return adminRepostoriy.existsByUserIdAndRole(userId,UserRole.ADMIN);
+        return adminRepostoriy.existsByUserIdAndRoleAndVisible(userId,UserRole.ADMIN,true);
     }
 }

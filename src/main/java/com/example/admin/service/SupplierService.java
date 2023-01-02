@@ -1,6 +1,6 @@
 package com.example.admin.service;
 
-import com.example.admin.repository.SupplierRepostoriy;
+import com.example.admin.repository.AdminRepository;
 import com.example.entity.AdminEntity;
 import com.example.enums.UserRole;
 import com.example.interfaces.Constant;
@@ -8,7 +8,6 @@ import com.example.myTelegramBot.MyTelegramBot;
 import com.example.utill.Button;
 import com.example.utill.IdCheckUtil;
 import com.example.utill.SendMsg;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -20,12 +19,12 @@ import java.util.Optional;
 public class SupplierService {
 
     private final MyTelegramBot myTelegramBot;
-    private final SupplierRepostoriy supplierRepostoriy;
+    private final AdminRepository repository;
 
     @Lazy
-    public SupplierService(MyTelegramBot myTelegramBot, SupplierRepostoriy supplierRepostoriy) {
+    public SupplierService(MyTelegramBot myTelegramBot, AdminRepository repository) {
         this.myTelegramBot = myTelegramBot;
-        this.supplierRepostoriy = supplierRepostoriy;
+        this.repository = repository;
     }
 
 
@@ -44,7 +43,7 @@ public class SupplierService {
     public void addSupplierPhone(Message message) {
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-                "Qo'shmoqchi bo'lgan ADMIN telefon raqamini kiriting Masalan (+998991234567)  ⬇"));
+                "Qo'shmoqchi bo'lgan Dostavshik telefon raqamini kiriting Masalan (+998991234567)  ⬇"));
     }
 
     public boolean checkPhpone(Message message) {
@@ -63,9 +62,9 @@ public class SupplierService {
     public boolean checkPassword(Message message) {
 
 
-        if (message.getText().length() >= 5) {
+        if (message.getText().length() < 5) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "" +
-                    "❌  Kechirasiz Dastavchik ga beriladigan Parol 5 xonali katta bo'lsin. " + "\n" +
+                    "❌  Kechirasiz Dastavchik ga beriladigan Parol eng kamida 5 ta belgidan iborat  bo'lsin. " + "\n" +
                     "✅  Qaytadan urining Masalan Parol (12345)." + "\n" +
                     "❌  Eslatma Parol boshqa Dastavchik Paroli bilan takrorlanmasin. "));
             return false;
@@ -84,7 +83,7 @@ public class SupplierService {
 
     public boolean supplierList(Message message) {
 
-        List<AdminEntity> adminEntityList = supplierRepostoriy.findByRole(UserRole.SUPPLIER);
+        List<AdminEntity> adminEntityList = repository.findByRoleAndVisible(UserRole.SUPPLIER, true);
 
         if (adminEntityList.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -112,13 +111,13 @@ public class SupplierService {
 
     public boolean deleteSupplierById(Message message) {
 
-      if (!IdCheckUtil.check(message.getText())){
+        if (!IdCheckUtil.check(message.getText())) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
-            "Id to'g'ri kiriting "));
+                    "Id to'g'ri kiriting "));
             return false;
         }
 
-       Optional<AdminEntity> optional= supplierRepostoriy.findById(Integer.valueOf(message.getText()));
+        Optional<AdminEntity> optional = repository.findById(Integer.valueOf(message.getText()));
 
         if (optional.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -126,7 +125,9 @@ public class SupplierService {
             return false;
         }
 
-        supplierRepostoriy.deleteById(optional.get().getId());
+        AdminEntity admin = optional.get();
+        admin.setVisible(false);
+        repository.save(admin);
         return true;
     }
 
@@ -154,7 +155,7 @@ public class SupplierService {
 
     public boolean checkPasswordDataBase(Message message) {
 
-        Optional<AdminEntity> optional = supplierRepostoriy.findByPassword(message.getText());
+        Optional<AdminEntity> optional = repository.findByPassword(message.getText());
 
         if (optional.isPresent()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
@@ -166,7 +167,7 @@ public class SupplierService {
 
     public boolean checkPhoneDataBase(Message message) {
 
-        Optional<AdminEntity> optional = supplierRepostoriy.findByPhone(message.getText());
+        Optional<AdminEntity> optional = repository.findByPhone(message.getText());
 
         if (optional.isPresent()) {
 
@@ -179,18 +180,18 @@ public class SupplierService {
 
 
     public List<AdminEntity> getEmptySupplierList() {
-        return supplierRepostoriy.findByRoleAndBusy(UserRole.SUPPLIER, false);
+        return repository.findByRoleAndBusy(UserRole.SUPPLIER, false);
     }
 
     public AdminEntity getByUserId(Long userId) {
-        return supplierRepostoriy.findByUserId(userId);
+        return repository.findByUserId(userId);
     }
 
     public boolean isSupplier(Long userId) {
-        return supplierRepostoriy.existsByUserIdAndRole(userId, UserRole.SUPPLIER);
+        return repository.existsByUserIdAndRoleAndVisible(userId, UserRole.SUPPLIER,true);
     }
 
     public void changeStatus(Long userId, boolean busy) {
-        supplierRepostoriy.changeStatus(userId, busy);
+        repository.changeStatus(userId, busy);
     }
 }

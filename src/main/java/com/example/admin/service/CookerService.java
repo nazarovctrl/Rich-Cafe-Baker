@@ -39,11 +39,11 @@ public class CookerService {
 
 
     public List<AdminEntity> getCookerList() {
-        return adminRepository.findByRole(UserRole.COOKER);
+        return adminRepository.findByRoleAndVisible(UserRole.COOKER,true);
     }
 
     public boolean isCooker(Long userId) {
-        return adminRepository.existsByUserIdAndRole(userId,UserRole.COOKER);
+        return adminRepository.existsByUserIdAndRoleAndVisible(userId,UserRole.COOKER,true);
     }
 
     public void getFinishedOrderList(Long chatId, MethodType methodType) {
