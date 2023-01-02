@@ -4,11 +4,16 @@ import com.example.entity.MealEntity;
 import com.example.interfaces.Constant;
 import com.example.myTelegramBot.MyTelegramBot;
 import com.example.service.MealsService;
+import com.example.service.OrderMealService;
 import com.example.utill.Button;
 import com.example.utill.SendMsg;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,23 +22,21 @@ import java.util.Optional;
 public class OrdersMenuController {
 
 
-
     public final MenuController menuController;
 
     private final MealsService mealsService;
-
+    private final OrderMealService orderMealService;
 
 
     private final MyTelegramBot myTelegramBot;
 
     @Lazy
-    public OrdersMenuController(MenuController menuController, MealsService mealsService, MyTelegramBot myTelegramBot) {
+    public OrdersMenuController(MenuController menuController, MealsService mealsService, OrderMealService orderMealService, MyTelegramBot myTelegramBot) {
         this.menuController = menuController;
         this.mealsService = mealsService;
+        this.orderMealService = orderMealService;
         this.myTelegramBot = myTelegramBot;
     }
-
-
 
 
     public void findMenuName(Message message) {
@@ -49,7 +52,7 @@ public class OrdersMenuController {
 
     }
 
-    public void findMenuName(Message message,String text) {
+    public void findMenuName(Message message, String text) {
         List<MealEntity> mealEntities = mealsService.findNameList(text);
 
 
@@ -66,15 +69,16 @@ public class OrdersMenuController {
         Optional<MealEntity> optional = mealsService.findName(message.getText());
 
 
-        if (optional.isEmpty()){
+        if (optional.isEmpty()) {
             myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                     "Iltimos qaytadan urinib koring"));
+            return;
         }
         MealEntity meal = optional.get();
 
         myTelegramBot.send(SendMsg.sendPhoto(message.getChatId(),
-                "Mahsulot nomi: "+meal.getName()+"\n\n" +
-                        "narxi: "+meal.getPrice(),
+                "Mahsulot nomi: " + meal.getName() + "\n\n" +
+                        "narxi: " + meal.getPrice(),
                 meal.getPhoto()));
 
         myTelegramBot.send(SendMsg.sendMsg(message.getChatId(), "Miqdorni tanlang ",

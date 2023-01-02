@@ -22,13 +22,11 @@ public class OrdersEntity {
     @Column
     private OrdersStatus status;
 
-    @Column
+    @Column(name = "created_date")
     private LocalDateTime createdDate;
 
-//    @ManyToOne
-//    @JoinColumn(name = "meal_table")
-//    private MealEntity meal_table;
-
+    @Column(name = "finished_date")
+    private LocalDateTime finishedDate;
 
     @ManyToOne
     @JoinColumn(name = "profile_id")

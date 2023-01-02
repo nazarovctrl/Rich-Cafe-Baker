@@ -46,7 +46,7 @@ public class DeliveryService {
         sendMessage.setReplyMarkup(Button.deliveryMarkup(ordersEntity.getId()));
         String text = ordersService.getOrderDetail(ordersEntity);
         text += "\n*Mijoz:* _" + ordersEntity.getProfile().getFullName() +
-                "_\n*Telefon raqam*: _" + ordersEntity.getProfile().getPhone()+"_";
+                "_\n*Telefon raqam*: _" + ordersEntity.getProfile().getPhone() + "_";
         sendMessage.setText(text);
 
         for (AdminEntity adminEntity : list) {
@@ -216,13 +216,12 @@ public class DeliveryService {
         OrdersEntity order = ordersService.findById(Integer.valueOf(split[1]));
 
 
-        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
-        markup.setKeyboard(keyboard);
-
         Long supplierUserId = update.getCallbackQuery().getFrom().getId();
         LocationMessageDTO messageDTO = getLocationMessageDTO(supplierUserId, order.getId());
 
+        InlineKeyboardMarkup markup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        markup.setKeyboard(keyboard);
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(Button.save(order.getProfile().getUserId(), order.getId()));
         row.add(Button.cancel(order.getProfile().getUserId(), order.getId()));
@@ -233,7 +232,33 @@ public class DeliveryService {
         }
         keyboard.add(row);
         keyboard.add(row2);
-        editMessage(update, markup);
+        try {
+            editMessage(update, markup);
+        } catch (Exception e) {
+            markup = new InlineKeyboardMarkup();
+            keyboard = new ArrayList<>();
+            markup.setKeyboard(keyboard);
+            row = new ArrayList<>();
+            row.add(Button.save(order.getProfile().getUserId(), order.getId()));
+            row.add(Button.cancel(order.getProfile().getUserId(), order.getId()));
+            row2 = Button.locationForAdmin(order.getId());
+            keyboard.add(row);
+            keyboard.add(row2);
+            try {
+                editMessage(update, markup);
+            } catch (Exception ex) {
+                markup = new InlineKeyboardMarkup();
+                keyboard = new ArrayList<>();
+                markup.setKeyboard(keyboard);
+                row = new ArrayList<>();
+                row.add(Button.save(order.getProfile().getUserId(), order.getId()));
+                row.add(Button.cancel(order.getProfile().getUserId(), order.getId()));
+                row2 = Button.locationForAdmin(order.getId());
+                row2.get(0).setText("\uD83D\uDCCD Yetkazib berish manzili (yopish)");
+                keyboard.add(row);
+                keyboard.add(row2);
+            }
+        }
 
 
         if (messageDTO != null) {
@@ -316,10 +341,30 @@ public class DeliveryService {
 
     public LocationMessageDTO getLocationMessageDTO(Long userId, Integer orderId) {
 
-        return locationMessageDTOList.stream().filter(dto -> dto.getSupplierUserId().equals(userId) && dto.getOrderId().equals(orderId)).findAny().orElse(null);
+        return locationMessageDTOList.stream().filter(dto ->
+                dto.getSupplierUserId().equals(userId) &&
+                        dto.getOrderId().equals(orderId)).findAny().orElse(null);
     }
 
     public void deleteLocationMessageDTO(LocationMessageDTO messageDTO) {
         locationMessageDTOList.remove(messageDTO);
+    }
+
+    public void searchAndDeleteAndRemoveLocationMessageDTO(Long userId, Integer orderId) {
+
+        LocationMessageDTO messageDTO = locationMessageDTOList.stream().filter(dto ->
+                dto.getSupplierUserId().equals(userId) &&
+                        dto.getOrderId().equals(orderId)).findAny().orElse(null);
+
+        if (messageDTO == null) {
+            return;
+        }
+        DeleteMessage deleteMessage = new DeleteMessage();
+        deleteMessage.setChatId(userId);
+        deleteMessage.setMessageId(messageDTO.getLocationMessageId());
+        locationMessageDTOList.remove(messageDTO);
+        myTelegramBot.send(deleteMessage);
+
+
     }
 }

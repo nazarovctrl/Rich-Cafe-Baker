@@ -15,6 +15,7 @@ public interface OrderMealRepository extends CrudRepository<OrderMealEntity, Int
             " and o.order.visible=true and o.visible=true ")
     List<OrderMealEntity> getNotConfirmedListByUserId(Long profileId);
 
-
     List<OrderMealEntity> findByOrderId(Integer orderId);
+
+
 }

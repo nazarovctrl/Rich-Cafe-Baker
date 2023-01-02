@@ -64,11 +64,12 @@ public interface Constant {
     String holat = "\uD83D\uDD16 Holat";
     String busy = "\uD83D\uDD34 band";
     String empty = "\uD83D\uDFE2 bo'sh";
-    String notDelivered = "\uD83D\uDEF5 ⌛️Buyurtmalar";
-    String delivered = "\uD83D\uDC64\uD83D\uDCE6 Buyurtmalar";
-    String delivery = "\uD83D\uDCE6\uD83D\uDC40 Buyurtma olish";
+    String notDelivered = "\uD83D\uDFE1 Buyurtmalar";
+    String delivered = "\uD83D\uDFE2 Buyurtmalar";
     String searchOrder = "\uD83D\uDD0E Qidirish";
     String finished ="\uD83D\uDFE2 Yakunlangan" ;
+    String notFinished = "\uD83D\uDFE1 Qabul qilingan";
+    String save = "✅ Qabul qilish";
     String notFinished = "\uD83D\uDFE1 Yakunlanmagan";
     String addCooker = "➕ Zabzal qushish";
     String deleteCooker = "\uD83D\uDDD1 Zabzal uchirish";
