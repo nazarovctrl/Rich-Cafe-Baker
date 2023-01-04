@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 
 
-
 @Entity
 @Table(name = "profile")
 public class ProfileEntity {
@@ -23,12 +22,11 @@ public class ProfileEntity {
     @Column(unique = true)
     private String phone;
 
-    @Column(name = "user_id",unique = true)
+    @Column(name = "user_id", unique = true)
     private Long userId;
 
     @Enumerated(EnumType.STRING)
     @Column
     private UserStatus status;
-
 
 }

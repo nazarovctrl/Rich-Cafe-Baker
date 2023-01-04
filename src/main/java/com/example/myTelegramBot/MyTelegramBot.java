@@ -15,14 +15,19 @@ import com.example.controller.FormalizationController;
 import com.example.controller.MainController;
 
 import com.example.enums.Step;
+import com.example.enums.UserStatus;
+import com.example.repository.ProfileRepository;
 import com.example.step.TelegramUsers;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.objects.Chat;
+import org.telegram.telegrambots.meta.api.objects.ChatMemberUpdated;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -41,16 +46,14 @@ public class MyTelegramBot extends TelegramLongPollingBot {
     private final CookerController cookerController;
     private final AdminAuthController adminAuthController;
     private final CallBackQueryController callBackQueryController;
-
     private final CookerService cookerService;
-
     private final SupplierService supplierService;
-
     private final SettingsService settingsService;
 
+    private final ProfileRepository profileRepository;
     private List<TelegramUsers> usersList = new ArrayList<>();
 
-    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController, SupplierController supplierController, CookerController controller, AdminAuthController adminAuthController, CallBackQueryController callBackQueryController, CookerService cookerService, SupplierService supplierService, SettingsService settingsService) {
+    public MyTelegramBot(MainController mainController, AuthController authController, FormalizationController formalizationController, BotConfig botConfig, AdminMainController adminController, SupplierController supplierController, CookerController controller, AdminAuthController adminAuthController, CallBackQueryController callBackQueryController, CookerService cookerService, SupplierService supplierService, SettingsService settingsService, ProfileRepository profileRepository) {
         this.mainController = mainController;
         this.authController = authController;
         this.formalizationController = formalizationController;
@@ -63,12 +66,33 @@ public class MyTelegramBot extends TelegramLongPollingBot {
         this.cookerService = cookerService;
         this.supplierService = supplierService;
         this.settingsService = settingsService;
+        this.profileRepository = profileRepository;
     }
 
 
     @Override
-    public void onUpdateReceived(Update update) {
+    public void onClosing() {
+        System.out.println("stop");
+    }
 
+    @Override
+    public void onUpdateReceived(Update update) {
+        if (update.hasMyChatMember()) {
+            ChatMember newChatMember = update.getMyChatMember().getNewChatMember();
+            String status = newChatMember.getStatus();
+            Long id = update.getMyChatMember().getFrom().getId();
+
+            if (status.equals("kicked")) {
+                profileRepository.changeVisibleByUserid(id, UserStatus.BLOCK);
+            } else if (status.equals("member")) {
+                profileRepository.changeVisibleByUserid(id, UserStatus.ACTIVE);
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.setText("Botni qayta ishga tushirganingizdan xursandmiz");
+                sendMessage.setChatId(id);
+                send(sendMessage);
+            }
+            return;
+        }
 
         if (update.hasMessage()) {
 
@@ -117,7 +141,6 @@ public class MyTelegramBot extends TelegramLongPollingBot {
                 cookerController.handle(message);
                 return;
             }
-
 
 
             if (message.hasText()) {

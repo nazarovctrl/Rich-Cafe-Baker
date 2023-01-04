@@ -32,5 +32,4 @@ public class AuthService {
         return repository.findByUserId(userId).get();
     }
 
-
 }
