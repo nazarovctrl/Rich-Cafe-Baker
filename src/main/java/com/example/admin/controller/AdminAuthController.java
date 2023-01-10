@@ -58,7 +58,7 @@ public class AdminAuthController {
                     return;
                 }
 
-                if (checkPhoneExists(message.getText())) {
+                if (!checkPhoneExists(message.getText())) {
                     myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                             "Bu raqam ruyhatdan o'tkazilmagan \n" +
                                     "Iltimos qaytadan kiriting "));
@@ -104,8 +104,9 @@ public class AdminAuthController {
         }
         if (message.hasContact() && users.getStep().equals(Step.PHONE)) {
 
-            String phone = message.getContact().getPhoneNumber();
-            if (checkPhoneExists(phone)) {
+            String phone = "+"+message.getContact().getPhoneNumber();
+            System.out.println(phone);
+            if (!checkPhoneExists(phone)) {
                 myTelegramBot.send(SendMsg.sendMsg(message.getChatId(),
                         "Bu raqam ruyhatdan o'tkazilmagan \n" +
                                 "Iltimos qaytadan kiriting "));
@@ -116,7 +117,7 @@ public class AdminAuthController {
             keyboardRemove.setRemoveKeyboard(true);
 
             SendMessage sendMessage = new SendMessage();
-//          sendMessage.setText("Sizga berilgan parolni kiriting");
+            sendMessage.setText("Sizga berilgan parolni kiriting");
 
             sendMessage.setChatId(message.getChatId());
             sendMessage.setReplyMarkup(keyboardRemove);
@@ -130,7 +131,7 @@ public class AdminAuthController {
     }
 
     public boolean checkPhoneExists(String text) {
-        return !authService.isExists(text);
+        return authService.isExists(text);
     }
 
     public boolean checkPhone(String text) {
